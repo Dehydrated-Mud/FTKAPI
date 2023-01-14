@@ -26,6 +26,12 @@ public class AssetManager : BaseManager<AssetManager>
 
     public static List<RuntimeAnimatorController> GetAnimationControllers<T>() where T : Weapon
     {
+        if(Weapons == null)
+        {
+            Weapons = Resources.LoadAll<Weapon>("").ToList();
+            Resources.UnloadUnusedAssets();
+        }
+        
         var result = Weapons.Select(o => o.m_AnimationController).ToList();
         return result;
     }
