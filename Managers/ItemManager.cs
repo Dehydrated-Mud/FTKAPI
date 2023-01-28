@@ -34,10 +34,8 @@ public class ItemManager : BaseManager<ItemManager> {
     public static CustomItem GetItem(FTK_itembase.ID id) {
         CustomItem customItem = new();
         FTK_itemsDB itemsDB = TableManager.Instance.Get<FTK_itemsDB>();
-
         var itemDetails = itemsDB.GetEntry(id);
         customItem.itemDetails = itemDetails;
-
         if (itemDetails.m_IsWeapon) {
             FTK_weaponStats2DB weaponsDB = TableManager.Instance.Get<FTK_weaponStats2DB>();
 

@@ -2,11 +2,13 @@
 
 namespace FTKAPI.Managers;
 
+using HutongGames.PlayMaker.Actions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Logger = Logger;
 
@@ -17,6 +19,7 @@ using Logger = Logger;
 public class AssetManager : BaseManager<AssetManager>
 {
     public static List<Weapon> Weapons;
+
 
     internal override void Init()
     {
@@ -33,6 +36,10 @@ public class AssetManager : BaseManager<AssetManager>
         }
         
         var result = Weapons.Select(o => o.m_AnimationController).ToList();
+        /*foreach (var wep in Weapons) 
+        { 
+            Logger.LogMessage("Weapon: " + wep.name + " of type: " + wep.m_WeaponType + " with controller: " + wep.m_AnimationController.name); 
+        }*/
         return result;
     }
 

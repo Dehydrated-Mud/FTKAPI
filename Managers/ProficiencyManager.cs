@@ -42,6 +42,8 @@ public class ProficiencyManager : BaseManager<ProficiencyManager> {
     /// <param name="plugin">Allows FTKModLib to know which plugin called this method. Not required but recommended to make debugging easier.</param>
     /// <returns>Returns FTK_proficiencyTable.ID enum as int</returns>
     public static int AddProficiency(CustomProficiency customProf, BaseUnityPlugin plugin = null) {
+
+
         if (plugin != null) customProf.PLUGIN_ORIGIN = plugin.Info.Metadata.GUID;
 
         ProficiencyManager profManager = ProficiencyManager.Instance;
