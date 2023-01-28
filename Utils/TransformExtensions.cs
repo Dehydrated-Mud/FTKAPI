@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace FTKAPI.Utils;
 
@@ -22,5 +23,10 @@ public static class TransformExtensions
     {
         transform.localScale = new Vector3(scale, scale, scale);
         return transform;
+    }
+    public static IEnumerable<Transform> Children(this Transform t)
+    {
+        foreach (Transform c in t)
+            yield return c;
     }
 }
