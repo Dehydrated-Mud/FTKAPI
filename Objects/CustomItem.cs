@@ -31,6 +31,7 @@ public class CustomItem : ConsumableBase
     {
         if (baseItem != FTK_itembase.ID.None)
         {
+            
             CustomItem source = ItemManager.GetItem(baseItem);
             this.itemDetails = source.itemDetails;
             this.weaponDetails = source.weaponDetails;
