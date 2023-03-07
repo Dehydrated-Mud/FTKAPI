@@ -12,15 +12,12 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using Logger = Logger;
 
-
 /// <summary>
 ///    Manager for handling assets (models/animations) added to the game.
 /// </summary>
 public class AssetManager : BaseManager<AssetManager>
 {
     public static List<Weapon> Weapons;
-
-
     internal override void Init()
     {
         Weapons = Resources.LoadAll<Weapon>("").ToList();

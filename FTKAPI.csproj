@@ -36,6 +36,9 @@
       <HintPath>Libs\stripped-binaries\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="MMHOOK_Assembly-CSharp">
+      <HintPath>Libs\stripped-binaries\MMHOOK_Assembly-CSharp.dll</HintPath>
+    </Reference>
     <Reference Include="Photon3Unity3D, Version=4.1.1.14, Culture=neutral, PublicKeyToken=null">
       <HintPath>Libs\stripped-binaries\Photon3Unity3D.dll</HintPath>
       <Private>false</Private>

@@ -2,6 +2,7 @@
 using BepInEx;
 using BepInEx.Logging;
 using FTKAPI.Compatibility;
+using FTKAPI.Objects.SkillHooks;
 using FTKAPI.Utils;
 using HarmonyLib;
 
@@ -20,6 +21,12 @@ namespace FTKAPI
 
         internal Harmony Harmony = new(PluginInfo.PLUGIN_GUID);
 
+        internal HookEndTurnSkills HookEndTurnSkillsHook;
+
+        internal HookMainSkills hookMainSkills;
+        internal HookRespondToAttack hookRespondToAttack;
+        internal HookDamageCalc hookDamageCalc;
+
         private void Awake()
         {
             Instance = this;
@@ -33,7 +40,14 @@ namespace FTKAPI
             // was false.
             FullSerializer.fsConfig.SerializeEnumsAsInteger = true;
             NetworkCompatibilityHandler.ScanPluginsForNetworkCompat();
-
+            HookEndTurnSkillsHook = new HookEndTurnSkills();
+            hookMainSkills = new HookMainSkills();
+            hookRespondToAttack = new HookRespondToAttack();
+            hookDamageCalc= new HookDamageCalc();
+            HookEndTurnSkillsHook.Initialize();
+            hookMainSkills.Initialize();
+            hookRespondToAttack.Initialize();
+            hookDamageCalc.Initialize();
             // Plugin startup logic
             Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
         }

@@ -13,10 +13,10 @@ namespace FTKAPI.Objects
 {
     public class CustomSkinset : FTK_skinset
     {
-        internal FTK_skinset.ID myBase = FTK_skinset.ID.blacksmith_Male;
+        internal FTK_skinset.ID myBase = FTK_skinset.ID.woodcutter_Male;
         internal string PLUGIN_ORIGIN = "null";
 
-        public CustomSkinset(ID baseSkinset = FTK_skinset.ID.hunter_Male)
+        public CustomSkinset(ID baseSkinset = FTK_skinset.ID.woodcutter_Male)
         {
             myBase = baseSkinset;
             var source = SkinsetManager.GetSkinset(baseSkinset);
@@ -35,7 +35,13 @@ namespace FTKAPI.Objects
             GameObject source = UnityEngine.Object.Instantiate(prefab);
             Transform sourceHairBottom = null;
             Transform sourceHairTop = null;
+            /*Vector3 localPosition = source.transform.localPosition;
+            Quaternion localRotation = source.transform.localRotation;
 
+            source.transform.parent = parentObjectDest.transform;
+
+            source.transform.localPosition = localPosition;
+            source.transform.localRotation = localRotation;*/
             try
             {
                 sourceHairBottom = source.transform.Children().Where(x => x.name.Contains("hairBottom")).ToList()[0];
@@ -76,6 +82,8 @@ namespace FTKAPI.Objects
             else
             {
                 Logger.LogInfo("setting mesh to: " + sourceRenderer.sharedMesh.name);
+                //destRenderer.bones = sourceRenderer.bones;
+                //destRenderer.rootBone = parentObjectDest.transform.Find("Root_M");
                 destRenderer.sharedMesh = sourceRenderer.sharedMesh;
                 Dictionary<int, Material> univOrder = new Dictionary<int, Material>();
                 List<Material> newSharedMaterials = new List<Material>(); 
@@ -129,8 +137,7 @@ namespace FTKAPI.Objects
                     Logger.LogError(String.Format("You have a hairBottom transform in your prefab {{}}, but it has no skinnedmeshrenderer component!", prefab.name));
                 }
                 destRendererHairBottom.sharedMesh = bottomRenderer.sharedMesh;
-                destRendererHairBottom.sharedMaterials = bottomRenderer.sharedMaterials;
-                destRendererHairBottom.sharedMaterial = bottomRenderer.sharedMaterial;
+                destRendererHairBottom.sharedMaterial.mainTexture = bottomRenderer.sharedMaterial.mainTexture;
             }
 
             if (sourceHairTop != null)
@@ -141,8 +148,7 @@ namespace FTKAPI.Objects
                     Logger.LogError(String.Format("You have a hairBottom transform in your prefab {{}}, but it has no skinnedmeshrenderer component!", prefab.name));
                 }
                 destRendererHairTop.sharedMesh = topRenderer.sharedMesh;
-                destRendererHairTop.sharedMaterials = topRenderer.sharedMaterials;
-                destRendererHairTop.sharedMaterial = topRenderer.sharedMaterial;
+                destRendererHairTop.sharedMaterial.mainTexture = topRenderer.sharedMaterial.mainTexture;
             }
 
             UnityEngine.Object.Destroy(source);
@@ -155,7 +161,9 @@ namespace FTKAPI.Objects
 
         public Armor MakeArmor(GameObject prefab)
         {
-            return new Armor();
+            GameObject armor = UnityEngine.Object.Instantiate(prefab);
+            armor.AddComponent<Armor>();
+            return armor.GetComponent<Armor>();
         }
         public Armor MakeArmor(ID skinsetID)
         {
@@ -164,7 +172,9 @@ namespace FTKAPI.Objects
 
         public Helmet MakeHelmet(GameObject prefab)
         {
-            return new Helmet();
+            GameObject helmet = UnityEngine.Object.Instantiate(prefab);
+            helmet.AddComponent<Helmet>();
+            return helmet.GetComponent<Helmet>();
         }
 
         public Helmet MakeHelmet(ID skinsetID)
@@ -174,7 +184,7 @@ namespace FTKAPI.Objects
 
         public GameObject MakeBoots(GameObject prefab)
         {
-            return new GameObject();
+            return prefab;
         }
 
         public GameObject MakeBoots(ID skinsetID)
@@ -184,7 +194,17 @@ namespace FTKAPI.Objects
 
         public GameObject MakeBackpack(GameObject prefab)
         {
-            return new GameObject();
+            GameObject backpack = UnityEngine.Object.Instantiate(prefab);
+            backpack.AddComponent<BoxCollider>();
+
+            backpack.AddComponent<Rigidbody>();
+            backpack.GetComponent<Rigidbody>().isKinematic = true;
+            backpack.GetComponent<Rigidbody>().drag = 0.1f;
+            backpack.GetComponent<Rigidbody>().angularDrag = 0.15f;
+
+            backpack.AddComponent<Detachable>();
+            backpack.GetComponent<Detachable>().m_DetachVelScale = 0.2f;
+            return backpack;
         }
 
         public GameObject MakeBackpack(ID skinsetID)
