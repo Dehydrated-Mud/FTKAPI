@@ -2,6 +2,7 @@
 
 namespace FTKAPI.Managers;
 
+using GridEditor;
 using HutongGames.PlayMaker.Actions;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ using Logger = Logger;
 public class AssetManager : BaseManager<AssetManager>
 {
     public static List<Weapon> Weapons;
+    public static List<FTK_itembase> Items;
     internal override void Init()
     {
         Weapons = Resources.LoadAll<Weapon>("").ToList();
@@ -28,18 +30,13 @@ public class AssetManager : BaseManager<AssetManager>
     {
         if(Weapons == null)
         {
-            Weapons = Resources.LoadAll<Weapon>("").ToList();
-            Resources.UnloadUnusedAssets();
+                Weapons = Resources.LoadAll<Weapon>("").ToList();
+                Resources.UnloadUnusedAssets();
         }
         
         var result = Weapons.Select(o => o.m_AnimationController).ToList();
-        /*foreach (var wep in Weapons) 
-        { 
-            Logger.LogMessage("Weapon: " + wep.name + " of type: " + wep.m_WeaponType + " with controller: " + wep.m_AnimationController.name); 
-        }*/
         return result;
     }
-
     #region
 
     /* MIT License

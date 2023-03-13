@@ -8,15 +8,17 @@ using System.Text;
 using UnityEngine;
 using FTKAPI.Utils;
 using Logger = FTKAPI.Utils.Logger;
+using myStitcher = FTKAPI.Utils.Stitcher;
+using HutongGames.PlayMaker.Actions;
 
 namespace FTKAPI.Objects
 {
     public class CustomSkinset : FTK_skinset
     {
-        internal FTK_skinset.ID myBase = FTK_skinset.ID.woodcutter_Male;
+        internal FTK_skinset.ID myBase = FTK_skinset.ID.woodcutter_Female;
         internal string PLUGIN_ORIGIN = "null";
 
-        public CustomSkinset(ID baseSkinset = FTK_skinset.ID.woodcutter_Male)
+        public CustomSkinset(ID baseSkinset = FTK_skinset.ID.woodcutter_Female)
         {
             myBase = baseSkinset;
             var source = SkinsetManager.GetSkinset(baseSkinset);
@@ -25,25 +27,21 @@ namespace FTKAPI.Objects
                 //FTKAPI.Utils.Logger.LogMessage("Setting field: " + field.Name + " to value: " + field.GetValue(source));
                 field.SetValue(this, field.GetValue(source));
             }
-
         }
         public CharacterEventListener MakeAvatar(GameObject prefab)
         {
-            SkinnedMeshRenderer sourceRenderer = null;
-            CharacterEventListener Avatar = UnityEngine.Object.Instantiate(SkinsetManager.GetSkinset(myBase).m_Avatar); //Clone base avatar and set it as my new avatar
-            Transform parentObjectDest = Avatar.transform;
+            Logger.LogWarning(prefab is null);
+            myStitcher stitcher = new myStitcher();
+            GameObject sourceRenderer = null;
+            GameObject Avatar = UnityEngine.Object.Instantiate(SkinsetManager.GetSkinset(myBase).m_Avatar.gameObject); //Clone base avatar and set it as my new avatar
+            Logger.LogWarning(Avatar.name);
             GameObject source = UnityEngine.Object.Instantiate(prefab);
             Transform sourceHairBottom = null;
             Transform sourceHairTop = null;
-            /*Vector3 localPosition = source.transform.localPosition;
-            Quaternion localRotation = source.transform.localRotation;
-
-            source.transform.parent = parentObjectDest.transform;
-
-            source.transform.localPosition = localPosition;
-            source.transform.localRotation = localRotation;*/
+            Logger.LogWarning("We have initialized, now attempting to find the hairs...");
             try
             {
+                sourceRenderer = source.transform.Children().Where(x => x.name.Contains("player")).ToList()[0].gameObject;
                 sourceHairBottom = source.transform.Children().Where(x => x.name.Contains("hairBottom")).ToList()[0];
                 sourceHairTop = source.transform.Children().Where(x => x.name.Contains("hairTop")).ToList()[0];
             }
@@ -51,108 +49,79 @@ namespace FTKAPI.Objects
             {
                 Logger.LogWarning(String.Format("No hairBottom and or hairTop objects found for prefab {{}}, defaulting to base avatar's hair.", prefab.name));
             }
-            
-            List<Transform> possibleTransforms = source.transform.Children().Where(x => x.name.Contains("player")).ToList();
 
-            if (possibleTransforms.Any())
+            Logger.LogWarning("Attempting to find destination objects...");
+            GameObject destRenderer = Avatar.transform.Children().Where(x => x.name.Contains("player")).ToList()[0].gameObject;
+            GameObject destRendererHairBottom = Avatar.transform.Children().Where(x => x.name.Contains("hairBottom")).ToList()[0].gameObject;
+            GameObject destRendererHairTop = Avatar.transform.Children().Where(x => x.name.Contains("hairTop")).ToList()[0].gameObject;
+
+            Logger.LogWarning("Attempting to destroy destination objects...");
+            if (destRenderer == null)
             {
-                if (possibleTransforms.Count > 1)
-                {
-                    Logger.LogError(String.Format("Found multiple transforms in prefab {{}} that begin with 'player'", prefab.name));
-                }
-
-                else
-                {
-                    sourceRenderer = possibleTransforms[0].GetComponent<SkinnedMeshRenderer>();
-                }
+                Logger.LogError(String.Format("Found no Player (model) in target avatar."));
             }
             else
             {
-                Logger.LogError(String.Format("Found no transforms in prefab {{}} that begin with 'player'", prefab.name));
+                UnityEngine.Object.Destroy(destRenderer);
             }
 
-            SkinnedMeshRenderer destRenderer = parentObjectDest.transform.Children().Where(x => x.name.Contains("player")).ToList()[0].GetComponent<SkinnedMeshRenderer>();
-            SkinnedMeshRenderer destRendererHairBottom = parentObjectDest.transform.Children().Where(x => x.name.Contains("hairBottom")).ToList()[0].GetComponent<SkinnedMeshRenderer>();
-            SkinnedMeshRenderer destRendererHairTop = parentObjectDest.transform.Children().Where(x => x.name.Contains("hairTop")).ToList()[0].GetComponent<SkinnedMeshRenderer>();
-
+            if (destRendererHairBottom == null)
+            {
+                Logger.LogError(String.Format("Found no HairTop in target avatar."));
+            }
+            else
+            {
+                UnityEngine.Object.Destroy(destRendererHairBottom);
+            }
+            if (destRendererHairTop == null)
+            {
+                Logger.LogError(String.Format("Found no HairBottom in target avatar."));
+            }
+            else
+            {
+                UnityEngine.Object.Destroy(destRendererHairTop);
+            }
+            
             if (sourceRenderer == null)
             {
                 Logger.LogError(String.Format("Found no SkinnedMeshRenderers in 'player' transform of prefab {{}} ", prefab.name));
             }
             else
             {
-                Logger.LogInfo("setting mesh to: " + sourceRenderer.sharedMesh.name);
-                //destRenderer.bones = sourceRenderer.bones;
-                //destRenderer.rootBone = parentObjectDest.transform.Find("Root_M");
-                destRenderer.sharedMesh = sourceRenderer.sharedMesh;
-                Dictionary<int, Material> univOrder = new Dictionary<int, Material>();
-                List<Material> newSharedMaterials = new List<Material>(); 
-
-                for (int j = 0; j < destRenderer.materials.Length; j++)
-                {
-                    string text = destRenderer.materials[j].name;
-                    if (text.Contains("_uncolored"))
-                    {
-                        univOrder.Add(0,destRenderer.materials[j]);
-                    }
-                    else if (text.Contains("_skin"))
-                    {
-                        univOrder.Add(1, destRenderer.materials[j]);
-                    }
-                    else if (text.Contains("_hair"))
-                    {
-                        univOrder.Add(2, destRenderer.materials[j]);
-                    }
-                }                
-                
-                for (int j = 0; j < sourceRenderer.materials.Length; j++)
-                {
-                    string text = sourceRenderer.materials[j].name;
-                    if (text.Contains("_uncolored"))
-                    {
-                        newSharedMaterials.Add(UnityEngine.Object.Instantiate(univOrder[0]));
-                    }
-                    else if (text.Contains("_skin"))
-                    {
-                        newSharedMaterials.Add(UnityEngine.Object.Instantiate(univOrder[1]));
-                    }
-                    else if (text.Contains("_hair"))
-                    {
-                        newSharedMaterials.Add(UnityEngine.Object.Instantiate(univOrder[2]));
-                    }
-                }
-                destRenderer.sharedMaterials = newSharedMaterials.ToArray();
-                foreach (Material mat in destRenderer.sharedMaterials)
-                {
-                    mat.mainTexture = sourceRenderer.sharedMaterial.mainTexture;
-                }
-                Avatar.RefreshRenderers();
+                Logger.LogWarning("Attempting to stitch player...");
+                stitcher.Stitch(sourceRenderer, Avatar);
             }
 
-            if (sourceHairBottom != null)
+            if (sourceHairTop.gameObject != null)
             {
-                SkinnedMeshRenderer bottomRenderer = sourceHairBottom.GetComponent<SkinnedMeshRenderer>();
-                if (bottomRenderer == null)
-                {
-                    Logger.LogError(String.Format("You have a hairBottom transform in your prefab {{}}, but it has no skinnedmeshrenderer component!", prefab.name));
-                }
-                destRendererHairBottom.sharedMesh = bottomRenderer.sharedMesh;
-                destRendererHairBottom.sharedMaterial.mainTexture = bottomRenderer.sharedMaterial.mainTexture;
-            }
-
-            if (sourceHairTop != null)
-            {
+                Logger.LogWarning(sourceHairTop.transform.name);
                 SkinnedMeshRenderer topRenderer = sourceHairTop.GetComponent<SkinnedMeshRenderer>();
                 if (topRenderer == null)
                 {
-                    Logger.LogError(String.Format("You have a hairBottom transform in your prefab {{}}, but it has no skinnedmeshrenderer component!", prefab.name));
+                    Logger.LogWarning(String.Format("You have a hairBottom transform in your prefab {{}}, but it has no skinnedmeshrenderer component!", prefab.name));
                 }
-                destRendererHairTop.sharedMesh = topRenderer.sharedMesh;
-                destRendererHairTop.sharedMaterial.mainTexture = topRenderer.sharedMaterial.mainTexture;
+                Logger.LogWarning("Attempting to stitch top hair...");
+                stitcher.Stitch(sourceHairTop.gameObject, Avatar);
             }
 
+            Logger.LogWarning("Attempting to stitch bottom hair...");
+            if (sourceHairBottom != null)
+            {
+                Logger.LogWarning(sourceHairBottom.transform.name);
+                SkinnedMeshRenderer bottomRenderer = sourceHairBottom.GetComponent<SkinnedMeshRenderer>();
+                if (bottomRenderer == null)
+                {
+                    Logger.LogWarning(String.Format("You have a hairBottom transform in your prefab {{}}, but it has no skinnedmeshrenderer component!", prefab.name));
+                }
+                Logger.LogWarning("Attempting to add component to bottom hair...");
+                sourceHairBottom.gameObject.AddComponent<WillRenderNotifier>();
+                sourceHairBottom.gameObject.GetComponent<WillRenderNotifier>().m_Avatar = Avatar.GetComponent<CharacterEventListener>();
+                stitcher.Stitch(sourceHairBottom.gameObject, Avatar);
+            }
+
+            Logger.LogWarning("Destroying source!");
             UnityEngine.Object.Destroy(source);
-            return Avatar;
+            return Avatar.GetComponent<CharacterEventListener>();
         }
         public CharacterEventListener MakeAvatar(ID skinsetID)
         {
@@ -174,6 +143,7 @@ namespace FTKAPI.Objects
         {
             GameObject helmet = UnityEngine.Object.Instantiate(prefab);
             helmet.AddComponent<Helmet>();
+            helmet.GetComponent<Helmet>().m_IsHairBottomOn = true;
             return helmet.GetComponent<Helmet>();
         }
 

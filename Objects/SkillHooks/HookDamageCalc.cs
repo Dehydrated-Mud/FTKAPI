@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using FullInspector;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
@@ -46,8 +47,14 @@ namespace FTKAPI.Objects.SkillHooks
             }
             if (_atk.m_IgnoresArmor)
             {
-                dummyAttackProperties.m_Resist = Mathf.Min(0, dummyAttackProperties.m_Resist);
-                dummyAttackProperties.m_Armor = Mathf.Min(0, dummyAttackProperties.m_Armor);
+                int impervious = 0;
+                if ((bool)_atk.m_DamagedDummy.m_CharacterOverworld && _atk.m_DamagedDummy.Taunting)
+                {
+                    impervious = _atk.m_DamagedDummy.m_CharacterOverworld.m_CharacterStats.m_PlayerLevel;
+                }
+                
+                dummyAttackProperties.m_Resist = Mathf.Max(Mathf.Min(0, dummyAttackProperties.m_Resist), impervious);
+                dummyAttackProperties.m_Armor = Mathf.Max(Mathf.Min(0, dummyAttackProperties.m_Armor), impervious);
             }
             _atk.m_TotalDMG = FTKUtil.RoundToInt(_atk.m_SlotSuccessPercent * (float)dummyAttackProperties.m_MaxWeaponDamage * _dmgMultiplier);
             switch (_cheatType)
@@ -229,15 +236,20 @@ namespace FTKAPI.Objects.SkillHooks
         {
             if ((bool)_char.m_CharacterOverworld)
             {
+                Logger.LogWarning("char Overworld");
                 if (_char.m_CharacterOverworld.m_CharacterStats.m_CharacterSkills is CustomCharacterSkills)
                 {
+                    Logger.LogWarning("custom skills");
                     CustomCharacterSkills _tmpSkills = (CustomCharacterSkills)_char.m_CharacterOverworld.m_CharacterStats.m_CharacterSkills;
                     if (_tmpSkills.Skills != null)
                     {
+                        Logger.LogWarning("not null");
                         foreach (FTKAPI_CharacterSkill _skill in _tmpSkills.Skills)
                         {
+                            Logger.LogWarning("found a skill");
                             if ((_skill.Trigger & _trig) == _trig)
                             {
+                                Logger.LogWarning("Attempting Custom Skill");
                                 _skill.Skill(_char.m_CharacterOverworld, _trig, _atk);
                             }
                         }

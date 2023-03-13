@@ -3,12 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GridEditor;
 using Logger = FTKAPI.Utils.Logger;
 
 namespace FTKAPI.Objects
 {
     public class FTKAPI_CharacterSkill
     {
+        public string m_ToolTip;
+        public string m_DisplayName;
+        public bool proc = false;
+        internal FTK_characterSkill.ID m_skillInfo = FTK_characterSkill.ID.None;
         [Flags]
         public enum TriggerType : uint
         {
@@ -27,25 +32,45 @@ namespace FTKAPI.Objects
             TheyHeavyDamage = 1 << 11,
             IAnyDamage = 1 << 12,
             ILightDamage = 1 << 13,
-            IHeavyDamage = 1 << 14
+            IHeavyDamage = 1 << 14,
+            SpecialAttackAnim = 1 << 15
         }
 
         internal TriggerType m_TriggerType;
-        string m_Name;
         public virtual void Skill(CharacterOverworld cow, TriggerType trig, AttackAttempt atk) { }
         public virtual void Skill(CharacterOverworld _cow, TriggerType _trig) 
         {
             Logger.LogWarning("If you are seeing this you probably did not overwrite the Skill function, or overwrote the incorrect overload.");
         }
-        public string Name
-        {
-            get => m_Name;
-            set => m_Name = value;
-        }
         public TriggerType Trigger
         {
             get => m_TriggerType;
             set => m_TriggerType = value;
+        }
+        private CustomLocalizedString name;
+        public CustomLocalizedString Name
+        {
+            get => this.name;
+            set
+            {
+                this.name = value;
+                this.m_DisplayName = this.name.GetLocalizedString();
+            }
+        }
+        private CustomLocalizedString description;
+        public CustomLocalizedString Description
+        {
+            get => this.description;
+            set
+            {
+                this.description = value;
+                this.m_ToolTip = this.description.GetLocalizedString();
+            }
+        }
+        public FTK_characterSkill.ID SkillInfo
+        {
+            get => this.m_skillInfo;
+            set => this.m_skillInfo = value;
         }
     }
 }

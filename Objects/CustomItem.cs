@@ -264,6 +264,36 @@ public class CustomItem : ConsumableBase
         }
     }
 
+    public int MinLevel
+    {
+        get => this.itemDetails.m_MinLevel;
+        set
+        {
+            this.itemDetails.m_MinLevel = value;
+            this.weaponDetails.m_MinLevel = value;
+        }
+    }
+
+    public Sprite Icon
+    {
+        get => this.itemDetails.m_Icon;
+        set
+        {
+            this.itemDetails.m_Icon = value;
+            this.weaponDetails.m_Icon = value;
+        }
+    }
+
+    public Sprite IconNonClickable
+    {
+        get => this.itemDetails.m_IconNonClickable;
+        set
+        {
+            this.itemDetails.m_IconNonClickable = value;
+            this.weaponDetails.m_IconNonClickable = value;
+        }
+    }
+
     public bool NightMarket
     {
         get => this.itemDetails.m_NightMarket;

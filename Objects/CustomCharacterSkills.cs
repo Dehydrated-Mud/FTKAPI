@@ -1,9 +1,11 @@
-﻿using GridEditor;
+﻿using BepInEx.Logging;
+using GridEditor;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Logger = FTKAPI.Utils.Logger;
 
 namespace FTKAPI.Objects {
     public class CustomCharacterSkills : CharacterSkills

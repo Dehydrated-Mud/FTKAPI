@@ -6,7 +6,7 @@ using GridEditor;
 namespace FTKAPI.Objects {
     public class CustomClass : FTK_playerGameStart {
         internal string PLUGIN_ORIGIN = "null";
-
+        internal bool m_DefaultHeadSize = true;
         public CustomClass(ID baseClass = FTK_playerGameStart.ID.blacksmith) {
             var source = ClassManager.GetClass(baseClass);
             foreach (FieldInfo field in typeof(FTK_playerGameStart).GetFields()) {
@@ -137,6 +137,12 @@ namespace FTKAPI.Objects {
         public SkinType DefaultSkinType {
             get => this.m_DefaultSkinType;
             set => this.m_DefaultSkinType = value;
+        }
+
+        public bool DefaultHeadSize
+        {
+            get => this.m_DefaultHeadSize;
+            set => this.m_DefaultHeadSize = value;
         }
     }
 }
