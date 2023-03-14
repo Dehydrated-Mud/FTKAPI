@@ -42,7 +42,6 @@ namespace FTKAPI.Objects.SkinHooks
                 if (_this.m_CharacterOverworld != null)
                 {
                     FTK_playerGameStart _player = ClassManager.GetClass(_this.m_CharacterOverworld.m_CharacterStats.m_CharacterClass);
-                    Logger.LogWarning(_player.GetType());
                     if (_player is CustomClass)
                     {
                         CustomClass _player1 = (CustomClass)_player;

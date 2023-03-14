@@ -25,10 +25,10 @@ namespace FTKAPI.Objects.SkillHooks
         private int GetSellItemValueHook(On.uiPopupMenu.orig_GetSellItemValue orig, uiPopupMenu self, FTK_itembase.ID _item)
         {
             MiniHexInfo pOI = self.m_Cow.GetPOI();
-            Logger.LogWarning("pOI: " + pOI);
-            Logger.LogWarning("Is weaponStats contain item? " + FTK_weaponStats2DB.GetDB().IsContain(_item));
-            Logger.LogWarning("Item is: " + _item);
-            Logger.LogWarning((int)_item);
+            Logger.LogInfo("pOI: " + pOI);
+            Logger.LogInfo("Is weaponStats contain item? " + FTK_weaponStats2DB.GetDB().IsContain(_item));
+            Logger.LogInfo("Item is: " + _item);
+            Logger.LogInfo((int)_item);
             if (ItemManager.Instance.customDictionary.TryGetValue((int)_item, out CustomItem customItem))
             {
                 return FTKUtil.RoundToInt((float)customItem.GoldValue * GameFlow.Instance.GameDif.m_ItemSellValue);

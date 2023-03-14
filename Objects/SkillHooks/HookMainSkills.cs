@@ -37,9 +37,9 @@ namespace FTKAPI.Objects.SkillHooks
                 if(_copy is CustomCharacterSkills)
                 {
                     CustomCharacterSkills tmp = (CustomCharacterSkills)_copy;
-                    Logger.LogWarning(tmp.m_Skills is null);//False
-                    Logger.LogWarning(_stats.GetType().Name);
-                    Logger.LogWarning(new CustomCharacterSkills(tmp, _stats).m_Skills[0].Name);//NullRef
+                    Logger.LogInfo(tmp.m_Skills is null);//False
+                    Logger.LogInfo(_stats.GetType().Name);
+                    Logger.LogInfo(new CustomCharacterSkills(tmp, _stats).m_Skills[0].Name);//NullRef
                     return new CustomCharacterSkills(tmp,_stats);
                 }
                 return new CustomCharacterSkills(_copy);

@@ -34,7 +34,6 @@ namespace FTKAPI.Objects.SkillHooks
                 if((bool)(_this.m_CharacterOverworld?.m_CharacterStats.m_CharacterSkills is CustomCharacterSkills))
                 {
                     CustomCharacterSkills tmp = (CustomCharacterSkills)_this.m_CharacterOverworld.m_CharacterStats.m_CharacterSkills;
-                    Logger.LogWarning("custom skills");
                     if (tmp.Skills != null)
                     {
                         foreach (FTKAPI_CharacterSkill _skill in tmp.Skills)

@@ -36,12 +36,11 @@ namespace FTKAPI.Objects.SkillHooks
                 x => x.MatchLdloc(20),
                 x => x.MatchLdcI4(9)
                 ) ;
-            Logger.LogWarning("I found the keys!");
+            Logger.LogInfo("I found the keys!");
             c.Emit(OpCodes.Ldarg_0);
             c.Emit(OpCodes.Ldarg_1);
             c.EmitDelegate<Action<CharacterDummy, bool>>((_this, _mainVictim) =>
             {
-                Logger.LogWarning("We have entered the Response delegate");
                 CharacterDummy _assailant = EncounterSession.Instance.GetDummyByFID(_this.m_DamageInfo.m_AttackerID);
                 if (_mainVictim & (bool)_assailant.m_CharacterOverworld)
                 {
@@ -51,12 +50,10 @@ namespace FTKAPI.Objects.SkillHooks
                         _tmpSkills = (CustomCharacterSkills)_assailant.m_CharacterOverworld.m_CharacterStats.m_CharacterSkills;
                         if (_tmpSkills.Skills != null)
                         {
-                            Logger.LogWarning("Skills not null");
                             foreach (FTKAPI_CharacterSkill _skill in _tmpSkills.Skills)
                             {
                                 if ((_skill.m_TriggerType & FTKAPI_CharacterSkill.TriggerType.RespondToHit) == FTKAPI_CharacterSkill.TriggerType.RespondToHit)
                                 {
-                                    Logger.LogWarning("Found a respondtohit skill");
                                     _skill.Skill(_assailant.m_CharacterOverworld, FTKAPI_CharacterSkill.TriggerType.RespondToHit);
                                 }
                             }

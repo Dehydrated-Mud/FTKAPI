@@ -43,14 +43,12 @@ namespace FTKAPI.Objects.SkillHooks
             c.Emit(loadCharStats.OpCode, loadCharStats.Operand);
             c.EmitDelegate<Action<CharacterStats>>((me) =>
             {
-                Logger.LogWarning(me.GetType().FullName);
+                Logger.LogInfo(me.GetType().FullName);
                 //Logger.LogWarning(me.m_CharacterSkills is null);
                 //Logger.LogWarning((me.m_CharacterSkills)?.GetType());
                 if (me.m_CharacterSkills is CustomCharacterSkills)
                 {
                     CustomCharacterSkills tmp = (CustomCharacterSkills)me.m_CharacterSkills;
-                    Logger.LogWarning(tmp.m_CharacterStats);
-                    Logger.LogWarning(tmp.m_Skills is null);//True
                     if ((bool)(tmp.m_Skills?.Count() > 0)) 
                     {
                         foreach (FTKAPI_CharacterSkill skill in tmp.m_Skills)
