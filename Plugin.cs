@@ -31,6 +31,7 @@ namespace FTKAPI
         internal HookProfGet hookProfGet;
         internal HookGetModDisplay hookGetModDisplay = new HookGetModDisplay();
         internal HookPlayAttackSequence hookPlayAttackSequence = new HookPlayAttackSequence();
+        internal HookGetSellItemValue hookGetSellItemValue = new HookGetSellItemValue();
 
         private void Awake()
         {
@@ -59,6 +60,7 @@ namespace FTKAPI
             hookProfGet.Initialize();
             hookGetModDisplay.Initialize();
             hookPlayAttackSequence.Initialize();
+            hookGetSellItemValue.Initialize();
 
             // Plugin startup logic
             Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");

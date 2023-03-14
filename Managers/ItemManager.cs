@@ -132,9 +132,9 @@ public class ItemManager : BaseManager<ItemManager> {
             static void Prefix() {
                 Logger.LogInfo("Preparing to load custom items");
                 ItemManager.Instance.successfulLoads = 0;
-                ItemManager.Instance.enums.Clear();
-                ItemManager.Instance.customDictionary.Clear();
-                ItemManager.Instance.moddedDictionary.Clear();
+                ItemManager.Instance.enums = new();
+                ItemManager.Instance.customDictionary = new();
+                ItemManager.Instance.moddedDictionary = new();
             }
         }
 

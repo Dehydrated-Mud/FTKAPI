@@ -25,7 +25,7 @@ namespace FTKAPI.Objects.SkillHooks
         private string GetModDisplayHook(On.CharacterSkills.orig_GetModDisplay orig, object _o, bool _format)
         {
 
-            Logger.LogWarning("Entering our new GetModDisplay method!");
+            //Logger.LogWarning("Entering our new GetModDisplay method!");
             string text = orig(_o, _format);
             if (_o is CustomCharacterSkills)
             {
