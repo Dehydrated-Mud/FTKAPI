@@ -17,7 +17,7 @@ namespace FTKAPI.Objects.SkillHooks
 {
     internal class HookRespondToAttack : BaseModule
     {
-        public void Initialize()
+        public override void Initialize()
         {
             Unload();
             IL.CharacterDummy.RespondToHit += HookRespondToHit;

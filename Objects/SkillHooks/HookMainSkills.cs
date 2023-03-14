@@ -13,7 +13,7 @@ namespace FTKAPI.Objects.SkillHooks
 {
     internal class HookMainSkills : BaseModule
     {
-        public void Initialize()
+        public override void Initialize()
         {
             Unload();
             IL.CharacterStats.TallyCharacterMods += HookTallyCharacterMods;

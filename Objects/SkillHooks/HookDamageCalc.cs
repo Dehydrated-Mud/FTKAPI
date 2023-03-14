@@ -16,7 +16,7 @@ namespace FTKAPI.Objects.SkillHooks
     internal class HookDamageCalc : BaseModule
     {
         private static ILHook _hook;
-        public void Initialize()
+        public override void Initialize()
         {
             Unload();
             On.DamageCalculator._calcDamage += HookCalcDamage;

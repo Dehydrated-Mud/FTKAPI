@@ -13,7 +13,7 @@ using FTKAPI.Objects;
 
 internal class HookProfGet : BaseModule
 {
-    public void Initialize()
+    public override void Initialize()
     {
         Unload();
         On.ProficiencyManager.Get += HookProfManagerGet;

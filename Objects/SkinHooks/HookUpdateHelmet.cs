@@ -83,7 +83,7 @@ namespace FTKAPI.Objects.SkinHooks
 
         internal static void UpdateNotNormal(GameObject _gameObject)
         {
-            _gameObject.transform.localPosition = new Vector3(0.13f, 0.0f, 0.0f);
+            _gameObject.transform.localPosition = new Vector3(0.125f, 0.0f, 0.0f);
             _gameObject.transform.localRotation = Quaternion.Euler(-90f, 90f, 0f);
             _gameObject.transform.localScale = new Vector3(0.83f, 0.83f, 0.83f);
         }

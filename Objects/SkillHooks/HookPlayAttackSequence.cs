@@ -14,7 +14,7 @@ namespace FTKAPI.Objects.SkillHooks
 {
     internal class HookPlayAttackSequence : BaseModule
     {
-        public void Initialize()
+        public override void Initialize()
         {
             Unload();
             IL.CharacterDummy.PlayAttackSequence += PlayAttackSequenceHook;
