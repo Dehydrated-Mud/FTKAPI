@@ -44,8 +44,8 @@ namespace FTKAPI.Objects.SkillHooks
             c.EmitDelegate<Action<CharacterStats>>((me) =>
             {
                 Logger.LogInfo(me.GetType().FullName);
-                //Logger.LogWarning(me.m_CharacterSkills is null);
-                //Logger.LogWarning((me.m_CharacterSkills)?.GetType());
+                Logger.LogWarning(me.m_CharacterSkills is null);
+                Logger.LogWarning((me.m_CharacterSkills)?.GetType());
                 if (me.m_CharacterSkills is CustomCharacterSkills)
                 {
                     CustomCharacterSkills tmp = (CustomCharacterSkills)me.m_CharacterSkills;

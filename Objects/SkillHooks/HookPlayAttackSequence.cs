@@ -1,11 +1,14 @@
-﻿using Mono.Cecil;
+﻿using FTKLog;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GridEditor;
 using static CharacterDummy;
 using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
 using Logger = FTKAPI.Utils.Logger;
@@ -30,10 +33,10 @@ namespace FTKAPI.Objects.SkillHooks
             c.Remove();
             c.EmitDelegate<Action<CharacterDummy, CharacterDummy.AttackAnim, CharacterEventListener.CombatAnimTrigger, DummyDamageInfo, DummyDamageInfo, DummyDamageInfo>>((_this, _attackAnim, _override, _ddi, _ddi1, _ddi2) =>
             {
-
-                if((bool)(_this.m_CharacterOverworld?.m_CharacterStats.m_CharacterSkills is CustomCharacterSkills))
+                Logger.LogWarning("Entering the playattack delegate");
+                if((bool)(_ddi.m_AttackerID.GetCow()?.m_CharacterStats.m_CharacterSkills is CustomCharacterSkills))
                 {
-                    CustomCharacterSkills tmp = (CustomCharacterSkills)_this.m_CharacterOverworld.m_CharacterStats.m_CharacterSkills;
+                    CustomCharacterSkills tmp = (CustomCharacterSkills)_ddi.m_AttackerID.GetCow().m_CharacterStats.m_CharacterSkills;
                     if (tmp.Skills != null)
                     {
                         foreach (FTKAPI_CharacterSkill _skill in tmp.Skills)

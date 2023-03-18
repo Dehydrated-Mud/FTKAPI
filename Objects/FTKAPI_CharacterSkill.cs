@@ -33,7 +33,9 @@ namespace FTKAPI.Objects
             IAnyDamage = 1 << 12,
             ILightDamage = 1 << 13,
             IHeavyDamage = 1 << 14,
-            SpecialAttackAnim = 1 << 15
+            SpecialAttackAnim = 1 << 15,
+            ConvertFocusToAction = 1 << 16,
+            RollSlots = 1 << 17
         }
 
         internal TriggerType m_TriggerType;
