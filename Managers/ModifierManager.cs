@@ -14,70 +14,70 @@ using Logger = FTKAPI.Utils.Logger;
 
 namespace FTKAPI.Managers;
 
-public class SkillManager : BaseManager<SkillManager>
+public class ModifierManager : BaseManager<ModifierManager>
 {
     public int successfulLoads = 0;
     public Dictionary<string, int> enums = new();
-    public Dictionary<int, CustomSkill> customDictionary = new();
-    public Dictionary<int, CustomSkill> moddedDictionary = new();
+    public Dictionary<int, CustomModifier> customDictionary = new();
+    public Dictionary<int, CustomModifier> moddedDictionary = new();
 
     internal override void Init()
     {
         Plugin.Instance.Harmony.PatchNested<HarmonyPatches>();
     }
 
-    public static FTK_characterSkill GetSkill(FTK_characterSkill.ID id)
+    public static FTK_characterModifier GetModifier(FTK_characterModifier.ID id)
     {
-        FTK_characterSkillDB playerSkillDB = TableManager.Instance.Get<FTK_characterSkillDB>();
-        return playerSkillDB.m_Array[(int)id];
+        FTK_characterModifierDB playerModifierDB = TableManager.Instance.Get<FTK_characterModifierDB>();
+        return playerModifierDB.m_Array[(int)id];
     }
 
-    public static int AddSkill(CustomSkill customSkill, BaseUnityPlugin plugin = null)
+    public static int AddModifier(CustomModifier customModifier, BaseUnityPlugin plugin = null)
     {
-        if (plugin != null) customSkill.PLUGIN_ORIGIN = plugin.Info.Metadata.GUID;
+        if (plugin != null) customModifier.PLUGIN_ORIGIN = plugin.Info.Metadata.GUID;
 
-        SkillManager SkillManager = SkillManager.Instance;
+        ModifierManager ModifierManager = ModifierManager.Instance;
         TableManager tableManager = TableManager.Instance;
 
         try
         {
-            SkillManager.enums.Add(customSkill.m_ID,
-                (int)Enum.GetValues(typeof(FTK_characterSkill.ID)).Cast<FTK_characterSkill.ID>().Max() + (SkillManager.successfulLoads + 1)
+            ModifierManager.enums.Add(customModifier.m_ID,
+                (int)Enum.GetValues(typeof(FTK_characterModifier.ID)).Cast<FTK_characterModifier.ID>().Max() + (ModifierManager.successfulLoads + 1)
             );
-            SkillManager.customDictionary.Add(SkillManager.enums[customSkill.m_ID], customSkill);
-            GEDataArrayBase geDataArrayBase = tableManager.Get(typeof(FTK_characterSkillDB));
-            if (!geDataArrayBase.IsContainID(customSkill.m_ID))
+            ModifierManager.customDictionary.Add(ModifierManager.enums[customModifier.m_ID], customModifier);
+            GEDataArrayBase geDataArrayBase = tableManager.Get(typeof(FTK_characterModifierDB));
+            if (!geDataArrayBase.IsContainID(customModifier.m_ID))
             {
-                geDataArrayBase.AddEntry(customSkill.m_ID);
-                ((FTK_characterSkillDB)geDataArrayBase).m_Array[tableManager.Get<FTK_characterSkillDB>().m_Array.Length - 1] = customSkill;
+                geDataArrayBase.AddEntry(customModifier.m_ID);
+                ((FTK_characterModifierDB)geDataArrayBase).m_Array[tableManager.Get<FTK_characterModifierDB>().m_Array.Length - 1] = customModifier;
                 geDataArrayBase.CheckAndMakeIndex();
             }
 
             // sometimes the object does not get added into the dictionary if initialize was called more than once, this ensures it does
-            if (!((FTK_characterSkillDB)geDataArrayBase).m_Dictionary.ContainsKey(tableManager.Get<FTK_characterSkillDB>().m_Array.Length - 1))
+            if (!((FTK_characterModifierDB)geDataArrayBase).m_Dictionary.ContainsKey(tableManager.Get<FTK_characterModifierDB>().m_Array.Length - 1))
             {
-                ((FTK_characterSkillDB)geDataArrayBase).m_Dictionary.Add(tableManager.Get<FTK_characterSkillDB>().m_Array.Length - 1, customSkill);
+                ((FTK_characterModifierDB)geDataArrayBase).m_Dictionary.Add(tableManager.Get<FTK_characterModifierDB>().m_Array.Length - 1, customModifier);
             }
 
-            SkillManager.successfulLoads++;
-            Logger.LogInfo($"Successfully added skill '{customSkill.ID}' from {customSkill.PLUGIN_ORIGIN}");
-            return SkillManager.enums[customSkill.m_ID];
+            ModifierManager.successfulLoads++;
+            Logger.LogInfo($"Successfully added modifier '{customModifier.ID}' from {customModifier.PLUGIN_ORIGIN}");
+            return ModifierManager.enums[customModifier.m_ID];
         }
         catch (Exception e)
         {
             Logger.LogError(e);
-            Logger.LogError($"Failed to add skill '{customSkill.ID}' from {customSkill.PLUGIN_ORIGIN}");
+            Logger.LogError($"Failed to add modifier '{customModifier.ID}' from {customModifier.PLUGIN_ORIGIN}");
             return -1;
         }
     }
 
-    public static void ModifySkill(FTK_characterSkill.ID id, CustomSkill customSkill)
+    public static void ModifyModifier(FTK_characterModifier.ID id, CustomModifier customModifier)
     {
-        FTK_characterSkillDB playerSkillDB = TableManager.Instance.Get<FTK_characterSkillDB>();
-        playerSkillDB.m_Array[(int)id] = customSkill;
-        playerSkillDB.m_Dictionary[(int)id] = customSkill;
-        SkillManager.Instance.moddedDictionary.Add((int)id, customSkill);
-        Logger.LogInfo($"Successfully modified skill '{id}'");
+        FTK_characterModifierDB playerModifierDB = TableManager.Instance.Get<FTK_characterModifierDB>();
+        playerModifierDB.m_Array[(int)id] = customModifier;
+        playerModifierDB.m_Dictionary[(int)id] = customModifier;
+        ModifierManager.Instance.moddedDictionary.Add((int)id, customModifier);
+        Logger.LogInfo($"Successfully modified modifier '{id}'");
     }
 
     /// <summary>
@@ -93,55 +93,55 @@ public class SkillManager : BaseManager<SkillManager>
         {
             static void Prefix()
             {
-                Logger.LogInfo("Preparing to load custom skills");
-                SkillManager.Instance.successfulLoads = 0;
-                SkillManager.Instance.enums.Clear();
-                SkillManager.Instance.customDictionary.Clear();
-                SkillManager.Instance.moddedDictionary.Clear();
+                Logger.LogInfo("Preparing to load custom modifiers");
+                ModifierManager.Instance.successfulLoads = 0;
+                ModifierManager.Instance.enums.Clear();
+                ModifierManager.Instance.customDictionary.Clear();
+                ModifierManager.Instance.moddedDictionary.Clear();
             }
         }
 
-        [HarmonyPatch(typeof(FTK_characterSkillDB), "GetEntry")]
+        [HarmonyPatch(typeof(FTK_characterModifierDB), "GetEntry")]
         // ReSharper disable once InconsistentNaming
-        class FTK_characterSkillDB_GetEntry_Patch
+        class FTK_characterModifierDB_GetEntry_Patch
         {
-            static bool Prefix(ref FTK_characterSkill __result, FTK_characterSkill.ID _enumID)
+            static bool Prefix(ref FTK_characterModifier __result, FTK_characterModifier.ID _enumID)
             {
-                if (SkillManager.Instance.customDictionary.TryGetValue((int)_enumID, out CustomSkill customSkill))
+                if (ModifierManager.Instance.customDictionary.TryGetValue((int)_enumID, out CustomModifier customModifier))
                 {
-                    __result = customSkill;
+                    __result = customModifier;
                     return false;
                 }
                 return true;
             }
         }
 
-        [HarmonyPatch(typeof(FTK_characterSkillDB), "GetIntFromID")]
+        [HarmonyPatch(typeof(FTK_characterModifierDB), "GetIntFromID")]
         // ReSharper disable once InconsistentNaming
-        class FTK_characterSkillDB_GetIntFromID_Patch
+        class FTK_characterModifierDB_GetIntFromID_Patch
         {
-            static bool Prefix(ref int __result, FTK_characterSkillDB __instance, string _id)
+            static bool Prefix(ref int __result, FTK_characterModifierDB __instance, string _id)
             {
                 //Attempts to return our enum and calls the original function if it errors.
-                if (SkillManager.Instance.enums.ContainsKey(_id))
+                if (ModifierManager.Instance.enums.ContainsKey(_id))
                 {
-                    __result = SkillManager.Instance.enums[_id];
+                    __result = ModifierManager.Instance.enums[_id];
                     return false;
                 }
                 return true;
             }
         }
 
-        [HarmonyPatch(typeof(FTK_characterSkill), "GetEnum")]
+        [HarmonyPatch(typeof(FTK_characterModifier), "GetEnum")]
         // ReSharper disable once InconsistentNaming
-        class FTK_characterSkill_GetEnum_Patch
+        class FTK_characterModifier_GetEnum_Patch
         {
-            static bool Prefix(ref FTK_characterSkill.ID __result, string _id)
+            static bool Prefix(ref FTK_characterModifier.ID __result, string _id)
             {
                 //Not 100% sure if this is required.
-                if (SkillManager.Instance.enums.ContainsKey(_id))
+                if (ModifierManager.Instance.enums.ContainsKey(_id))
                 {
-                    __result = (FTK_characterSkill.ID)SkillManager.Instance.enums[_id];
+                    __result = (FTK_characterModifier.ID)ModifierManager.Instance.enums[_id];
                     return false;
                 }
                 return true;

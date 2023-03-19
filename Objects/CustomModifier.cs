@@ -36,77 +36,77 @@ namespace FTKAPI.Objects
             get => this.m_ID;
             set => this.m_ID = value;
         }
-        public new int DefensePhysical
+        public int DefensePhysical
         {
             get => this.m_ModDefensePhysical;
             set => this.m_ModDefensePhysical = value;
         }
-        public new int DefenseMagic
+        public int DefenseMagic
         {
             get => this.m_ModDefenseMagic;
             set => this.m_ModDefenseMagic = value;
         }
-        public new float EvadeRating
+        public float EvadeRating
         {
             get => this.m_ModEvadeRating;
             set => this.m_ModEvadeRating = value;
         }
-        public new int PartyArmor
+        public int PartyArmor
         {
             get => this.m_PartyCombatArmor;
             set => this.m_PartyCombatArmor = value;
         }
-        public new int PartyResist
+        public int PartyResist
         {
             get => this.m_PartyCombatResist;
             set => this.m_PartyCombatResist = value;
         }
-        public new float PartyEvade
+        public float PartyEvade
         {
             get => this.m_PartyCombatEvade;
             set => this.m_PartyCombatEvade = value;
         }
-        public new int ReflectDamage
+        public int ReflectDamage
         {
             get => this.m_ReflectDamage;
             set => this.m_ReflectDamage = value;
         }
-        public new int PhysicalDamage
+        public int PhysicalDamage
         {
             get => this.m_ModAttackPhysical;
             set => this.m_ModAttackPhysical = value;
         }
-        public new int MagicDamage
+        public int MagicDamage
         {
             get => this.m_ModAttackMagic;
             set => this.m_ModAttackMagic = value;
         }
-        public new int AllDamage
+        public int AllDamage
         {
             get => this.m_ModAttackAll;
             set => this.m_ModAttackAll = value;
         }
-        public new float CritChance
+        public float CritChance
         {
             get => this.m_ModCritChance;
             set => this.m_ModCritChance = value;
         }
-        public new FTK_enemyCombat.EnemyRace BonusAgainstRace1
+        public FTK_enemyCombat.EnemyRace BonusAgainstRace1
         {
             get => this.m_BonusAgainstRace1;
             set => this.m_BonusAgainstRace1 = value;
         }
-        public new FTK_enemyCombat.EnemyRace BonusAgainstRace2
+        public FTK_enemyCombat.EnemyRace BonusAgainstRace2
         {
             get => this.m_BonusAgainstRace2;
             set => this.m_BonusAgainstRace2 = value;
         }
-        public new float BonusAgainstRace1Value
+        public float BonusAgainstRace1Value
         {
             get => this.m_BonusAgainstRace1Value;
             set => this.m_BonusAgainstRace1Value = value;
         }
-        public new float BonusAgainstRace2Value
+        public float BonusAgainstRace2Value
         {
             get => this.m_BonusAgainstRace2Value;
             set => this.m_BonusAgainstRace2Value = value;
