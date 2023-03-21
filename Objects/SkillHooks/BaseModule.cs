@@ -16,7 +16,7 @@ namespace FTKAPI.Objects.SkillHooks
             get => prof;
             set => prof = value;
         }
-        public static void ApplySkills(CharacterOverworld _char, FTKAPI_CharacterSkill.TriggerType _trig)
+        public void ApplySkills(CharacterOverworld _char, FTKAPI_CharacterSkill.TriggerType _trig)
         {
             if (_char.m_CharacterStats.m_CharacterSkills is CustomCharacterSkills)
             {
@@ -36,7 +36,7 @@ namespace FTKAPI.Objects.SkillHooks
                 }
             }
         }
-        public static void ApplySkills(CharacterDummy _char, FTKAPI_CharacterSkill.TriggerType _trig, AttackAttempt _atk)
+        public void ApplySkills(CharacterDummy _char, FTKAPI_CharacterSkill.TriggerType _trig, AttackAttempt _atk)
         {
             if ((bool)_char.m_CharacterOverworld)
             {

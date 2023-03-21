@@ -38,7 +38,7 @@ namespace FTKAPI.Objects
             get => this.m_ID;
             set => this.m_ID = value;
         }
-        public SpawnOption SpawnOption
+        public SpawnOption Spawn
         {
             get => this.m_Spawn;
             set => this.m_Spawn = value;

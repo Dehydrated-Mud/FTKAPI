@@ -22,18 +22,18 @@ namespace FTKAPI
 
         internal Harmony Harmony = new(PluginInfo.PLUGIN_GUID);
 
-        internal HookEndTurnSkills HookEndTurnSkillsHook;
-
-        internal HookMainSkills hookMainSkills;
-        internal HookRespondToAttack hookRespondToAttack;
-        internal HookDamageCalc hookDamageCalc;
-        internal HookUpdateHelmet hookUpdateHelmet;
-        internal HookProfGet hookProfGet;
+        internal HookEndTurnSkills HookEndTurnSkillsHook = new HookEndTurnSkills();
+        internal HookMainSkills hookMainSkills = new HookMainSkills();
+        internal HookRespondToAttack hookRespondToAttack = new HookRespondToAttack();
+        internal HookDamageCalc hookDamageCalc = new HookDamageCalc();
+        internal HookUpdateHelmet hookUpdateHelmet = new HookUpdateHelmet();
+        internal HookProfGet hookProfGet = new HookProfGet();
         internal HookGetModDisplay hookGetModDisplay = new HookGetModDisplay();
         internal HookPlayAttackSequence hookPlayAttackSequence = new HookPlayAttackSequence();
         internal HookGetSellItemValue hookGetSellItemValue = new HookGetSellItemValue();
         internal HookConvertFocusToAction hookConvertFocusToAction = new HookConvertFocusToAction();
         internal HookRollSlots hookRollSlots = new HookRollSlots();
+        internal HookSetDevoteCount hookSetDevoteCount = new HookSetDevoteCount();
 
         private void Awake()
         {
@@ -48,12 +48,12 @@ namespace FTKAPI
             // was false.
             FullSerializer.fsConfig.SerializeEnumsAsInteger = true;
             NetworkCompatibilityHandler.ScanPluginsForNetworkCompat();
-            HookEndTurnSkillsHook = new HookEndTurnSkills();
-            hookMainSkills = new HookMainSkills();
-            hookRespondToAttack = new HookRespondToAttack();
-            hookDamageCalc= new HookDamageCalc();
-            hookUpdateHelmet = new HookUpdateHelmet();
-            hookProfGet = new HookProfGet();
+            HookEndTurnSkillsHook.Initialize();
+            hookMainSkills.Initialize();
+            hookRespondToAttack.Initialize();
+            hookDamageCalc.Initialize();
+            hookUpdateHelmet.Initialize();
+            hookProfGet.Initialize();
             HookEndTurnSkillsHook.Initialize();
             hookMainSkills.Initialize();
             hookRespondToAttack.Initialize();
@@ -65,6 +65,7 @@ namespace FTKAPI
             hookGetSellItemValue.Initialize();
             hookConvertFocusToAction.Initialize();
             hookRollSlots.Initialize();
+            hookSetDevoteCount.Initialize();
             
 
             // Plugin startup logic

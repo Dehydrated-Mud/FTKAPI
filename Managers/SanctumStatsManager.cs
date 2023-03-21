@@ -54,9 +54,9 @@ public class SanctumStatsManager : BaseManager<SanctumStatsManager>
             }
 
             // sometimes the object does not get added into the dictionary if initialize was called more than once, this ensures it does
-            if (!((FTK_sanctumStatsDB)geDataArrayBase).m_Dictionary.ContainsKey(tableManager.Get<FTK_sanctumStatsDB>().m_Array.Length - 1))
+            if (!(bool)((FTK_sanctumStatsDB)geDataArrayBase).m_Dictionary?.ContainsKey(tableManager.Get<FTK_sanctumStatsDB>().m_Array.Length - 1))
             {
-                ((FTK_sanctumStatsDB)geDataArrayBase).m_Dictionary.Add(tableManager.Get<FTK_sanctumStatsDB>().m_Array.Length - 1, customSanctum);
+                ((FTK_sanctumStatsDB)geDataArrayBase).m_Dictionary?.Add(tableManager.Get<FTK_sanctumStatsDB>().m_Array.Length - 1, customSanctum);
             }
 
             SanctumStatsManager.successfulLoads++;
@@ -75,7 +75,8 @@ public class SanctumStatsManager : BaseManager<SanctumStatsManager>
     {
         FTK_sanctumStatsDB playerSanctumDB = TableManager.Instance.Get<FTK_sanctumStatsDB>();
         playerSanctumDB.m_Array[(int)id] = customSanctum;
-        playerSanctumDB.m_Dictionary[(int)id] = customSanctum;
+        //null
+        //playerSanctumDB.m_Dictionary[(int)id] = customSanctum;
         SanctumStatsManager.Instance.moddedDictionary.Add((int)id, customSanctum);
         Logger.LogInfo($"Successfully modified sanctum '{id}'");
     }

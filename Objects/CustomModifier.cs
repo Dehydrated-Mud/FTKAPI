@@ -26,6 +26,29 @@ namespace FTKAPI.Objects
                 field.SetValue(this, field.GetValue(source));
             }
         }
+        public virtual void AddStatModifierToTally(CharacterStats _player)
+        {
+            _player.m_ModAttackPhysical += 0;
+            _player.m_ModAttackMagic += 0;
+            _player.m_ModAttackAll += 0;
+            _player.m_ModCritChance += 0f;
+            _player.m_ReflectDamage += 0;
+            _player.m_ModToughness += 0f;
+            _player.m_ModAwareness += 0f;
+            _player.m_ModFortitude += 0f;
+            _player.m_ModQuickness += 0f;
+            _player.m_ModTalent += 0f;
+            _player.m_ModVitality += 0f;
+            _player.m_ModLuck += 0.1f;
+            _player.m_ModFindRadius += 0;
+            _player.m_ModShopPrice += 0f;
+            _player.m_ModExtraActions += 0;
+            _player.m_ModMaxFocus += 0;
+            _player.m_ModMaxHealth += 0;
+            _player.m_ModHealthRegen += 0;
+            _player.m_ModXp += 0f;
+            _player.m_ModGold += 0f;
+        }
         public FTK_characterModifier.ID BaseModifier
         {
             get => myBase;
@@ -319,7 +342,7 @@ namespace FTKAPI.Objects
             get => this.m_PartyImmunePetrify;
             set => this.m_PartyImmunePetrify = value;
         }
-        public CharacterSkills CharacterSkills
+        public CharacterSkills ModCharacterSkills
         {
             get => this.m_CharacterSkills;
             set => this.m_CharacterSkills = value;
