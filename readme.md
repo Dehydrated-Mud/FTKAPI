@@ -13,6 +13,18 @@ There is a provided example plugin(s) made with the use of the library located i
   Can create a character class with full custom functionality or inherit functionality from existing classes (blacksmith, hunter, etc.).
 - **CustomLocalizedString**  
   Can create a string/text that supports additional languages.
+- **CustomSkinset**
+  Can create new skinsets/avatars (character models) either by kitbashing existing skins or by loading prefabs.
+- **CustomSkill**
+  Can create the cosmetic aspects of a character skill
+- **CustomCharacterSkills**
+  A new CharacterSkills object that can store and manage character skills
+- **FTKAPI_CharacterSkill**
+  A brand new way of making character skills by defining functions and hookpoints. No ILHooking by the user required!
+- **CustomModifier**
+  Can create new CharacterModifiers, complete with a built in ability to scale the modifier with the character stats.
+- **CustomSanctumStats**
+  Can create new Sanctums.
 
 #### Managers
 - **AssetManager**  
@@ -25,6 +37,14 @@ There is a provided example plugin(s) made with the use of the library located i
   Allows registering custom objects with network connectivity. Example below.
 - **PluginConfigManager**  
   Allows plugins to add configuration entry directly into game menu. Example below.
+- **SkinsetManager**
+  Allows the modification and addition of classes
+- **SkillManager**
+  Allows the modification and addition of characterskill "cosmetics"
+- **ModifierManager**
+  Allow the modification and addition of characterModifiers.
+- **SanctumStatsManager**
+  Allows the modification and addition of sanctums.
 
 ## Networking
 When using `NetworkManager`, you can register object that can be instantiated on your and other clients side and have working communication between users. Simplest way to do that is to use RPC-commands through your custom inheritor of `PunBehavior` class. Here is example of such implementation:
