@@ -165,6 +165,14 @@ namespace FTKAPI.Objects
         public GameObject MakeBackpack(GameObject prefab)
         {
             GameObject backpack = UnityEngine.Object.Instantiate(prefab);
+            if (!backpack.GetComponent<MeshFilter>())
+            {
+                backpack.AddComponent<MeshFilter>();
+            }
+            if (backpack.GetComponent<MeshRenderer>())
+            {
+                backpack.AddComponent<MeshRenderer>();
+            }
             backpack.AddComponent<BoxCollider>();
 
             backpack.AddComponent<Rigidbody>();

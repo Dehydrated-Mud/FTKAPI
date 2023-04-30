@@ -30,13 +30,16 @@ namespace FTKAPI.Objects.SkillHooks
             if (_o is CustomCharacterSkills)
             {
                 CustomCharacterSkills tmpSkills = (CustomCharacterSkills) _o;
-                foreach (FTKAPI_CharacterSkill skill in tmpSkills.Skills)
+                if (tmpSkills.Skills != null && tmpSkills.Skills.Count() > 0)
                 {
-                    text = text + skill.m_DisplayName + "\n";
+                    foreach (FTKAPI_CharacterSkill skill in tmpSkills.Skills)
+                    {
+                        text = text + skill.m_DisplayName + "\n";
+                    }
+                    return text;
                 }
-                return text;
             }
-            return text;
+            return text.TrimEnd(new char[] { '\n' });
 
         }
 

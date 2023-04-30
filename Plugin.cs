@@ -4,6 +4,8 @@ using BepInEx.Logging;
 using FTKAPI.Compatibility;
 using FTKAPI.Objects.SkillHooks;
 using FTKAPI.Objects.SkinHooks;
+using FTKAPI.APIs.BattleAPI;
+using FTKAPI.PhotonHooks;
 using FTKAPI.Utils;
 using HarmonyLib;
 
@@ -34,6 +36,9 @@ namespace FTKAPI
         internal HookConvertFocusToAction hookConvertFocusToAction = new HookConvertFocusToAction();
         internal HookRollSlots hookRollSlots = new HookRollSlots();
         internal HookSetDevoteCount hookSetDevoteCount = new HookSetDevoteCount();
+        internal HookTallyCharacterMods hookTallyCharacterMods = new HookTallyCharacterMods();
+        internal HookInstantiate hookInstantiate = new HookInstantiate();
+        internal BattleAPI battleAPI = new BattleAPI();
 
         private void Awake()
         {
@@ -66,8 +71,10 @@ namespace FTKAPI
             hookConvertFocusToAction.Initialize();
             hookRollSlots.Initialize();
             hookSetDevoteCount.Initialize();
-            
+            hookTallyCharacterMods.Initialize();
+            hookInstantiate.Initialize();
 
+            BattleAPI.Instance.Initialize();
             // Plugin startup logic
             Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
         }

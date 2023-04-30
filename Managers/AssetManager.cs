@@ -22,18 +22,21 @@ public class AssetManager : BaseManager<AssetManager>
     public static List<FTK_itembase> Items;
     internal override void Init()
     {
-        Weapons = Resources.LoadAll<Weapon>("").ToList();
-        Resources.UnloadUnusedAssets();
+        LoadAllWeapons();
     }
-
+    private static void LoadAllWeapons()
+    {
+        if (Weapons == null)
+        {
+            Weapons = Resources.LoadAll<Weapon>("").ToList();
+            Resources.UnloadUnusedAssets();
+            
+        }
+    }
     public static List<RuntimeAnimatorController> GetAnimationControllers<T>() where T : Weapon
     {
-        if(Weapons == null)
-        {
-                Weapons = Resources.LoadAll<Weapon>("").ToList();
-                Resources.UnloadUnusedAssets();
-        }
-        
+
+        LoadAllWeapons();
         var result = Weapons.Select(o => o.m_AnimationController).ToList();
         return result;
     }

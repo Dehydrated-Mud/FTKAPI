@@ -10,6 +10,13 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using Logger = FTKAPI.Utils.Logger;
+using TriggerType = FTKAPI.Objects.FTKAPI_CharacterSkill.TriggerType;
+using ModTriggerType = FTKAPI.Objects.CustomModifier.ModTriggerType;
+using GridEditor;
+using FTKAPI.Managers;
+using static CharacterDummy;
+using static Colorful.ChannelSwapper;
+using FTKAPI.APIs.BattleAPI;
 
 namespace FTKAPI.Objects.SkillHooks
 {
@@ -20,11 +27,41 @@ namespace FTKAPI.Objects.SkillHooks
         {
             Unload();
             On.DamageCalculator._calcDamage += HookCalcDamage;
+            
+            //On.CharacterDummy.RespondToHit += TestHook;
         }
 
         private static DummyDamageInfo HookCalcDamage(On.DamageCalculator.orig__calcDamage orig, AttackAttempt _atk, float _dmgMultiplier, bool _mainTarget, bool _itemAttack, SlotControl.AttackCheatType _cheatType)
         {
-            Logger.LogWarning("I hooked it all!");
+            CommonBattleHook(_atk.m_AttackingDummy, TriggerType.DamageCalcStart, _atk);
+            CommonBattleHook(_atk.m_DamagedDummy, TriggerType.DamageCalcStart, _atk);
+            bool attacker = false;
+            CustomCharacterStats customStats = new CustomCharacterStats();
+            if ((bool)_atk.m_DamagedDummy.m_CharacterOverworld)
+            {
+                attacker = false;
+                Logger.LogWarning("Defender is character");
+                if ((bool)_atk.m_DamagedDummy.m_CharacterOverworld.gameObject.GetComponent<CustomCharacterStats>())
+                {
+                    Logger.LogWarning("Defender has customcharacterstats");
+                    customStats = _atk.m_DamagedDummy.m_CharacterOverworld.gameObject.GetComponent<CustomCharacterStats>();
+                }
+            }
+            else if ((bool)_atk.m_AttackingDummy.m_CharacterOverworld)
+            {
+                attacker = true;
+                Logger.LogWarning("Attacker is character");
+                if ((bool)_atk.m_AttackingDummy.m_CharacterOverworld.gameObject.GetComponent<CustomCharacterStats>())
+                {
+                    Logger.LogWarning("Attacker has customcharacterstats");
+                    customStats = _atk.m_AttackingDummy.m_CharacterOverworld.gameObject.GetComponent<CustomCharacterStats>();
+                }
+            }
+            else
+            {
+                Logger.LogError("Could not find a player with a CustomCharacterStats object! Attacking Dummy: " + _atk.m_AttackingDummy.name + " and Defending Dummy: " + _atk.m_DamagedDummy.name);
+            }
+
             DummyAttackProperties dummyAttackProperties = new DummyAttackProperties(_atk);
             if (_itemAttack)
             {
@@ -47,14 +84,24 @@ namespace FTKAPI.Objects.SkillHooks
             }
             if (_atk.m_IgnoresArmor)
             {
-                int impervious = 0;
-                if ((bool)_atk.m_DamagedDummy.m_CharacterOverworld && _atk.m_DamagedDummy.Taunting)
+                CombatFloat combatArmor = new CombatFloat
                 {
-                    impervious = _atk.m_DamagedDummy.m_CharacterOverworld.m_CharacterStats.m_PlayerLevel;
-                }
-                
-                dummyAttackProperties.m_Resist = Mathf.Max(Mathf.Min(0, dummyAttackProperties.m_Resist), impervious);
-                dummyAttackProperties.m_Armor = Mathf.Max(Mathf.Min(0, dummyAttackProperties.m_Armor), impervious);
+                    Value = 0,
+                    SetFloat = SetFloats.ImperviousArmor
+                };
+                CombatFloat combatResist = new CombatFloat
+                {
+                    Value = 0,
+                    SetFloat = SetFloats.ImperviousResist
+                };
+
+                int minArmor = FTKUtil.RoundToInt(BattleAPI.Instance.GetFloat(_atk.m_DamagedDummy, combatArmor));
+                int minResist = FTKUtil.RoundToInt(BattleAPI.Instance.GetFloat(_atk.m_DamagedDummy, combatResist));
+
+                Logger.LogWarning($"Granting +{minArmor} impervious armor and +{minResist} impervious resistance");
+                dummyAttackProperties.m_Resist = Mathf.Min(minResist, dummyAttackProperties.m_Resist);
+                dummyAttackProperties.m_Armor = Mathf.Min(minArmor, dummyAttackProperties.m_Armor);
+
             }
             _atk.m_TotalDMG = FTKUtil.RoundToInt(_atk.m_SlotSuccessPercent * (float)dummyAttackProperties.m_MaxWeaponDamage * _dmgMultiplier);
             switch (_cheatType)
@@ -77,6 +124,23 @@ namespace FTKAPI.Objects.SkillHooks
                     }
                     break;
             }
+
+            // Battle API call to modify total damage
+            CombatFloat cFloat = new CombatFloat
+            {
+                SetFloat = SetFloats.OutgoingTotalDmg,
+                Value = _atk.m_TotalDMG
+            };
+            _atk.m_TotalDMG = FTKUtil.RoundToInt(BattleAPI.Instance.GetFloat(_atk.m_AttackingDummy, cFloat));
+
+            CombatFloat cFloat1 = new CombatFloat
+            {
+                SetFloat = SetFloats.IncomingTotalDmg,
+                Value = _atk.m_TotalDMG
+            };
+            _atk.m_TotalDMG = FTKUtil.RoundToInt(BattleAPI.Instance.GetFloat(_atk.m_DamagedDummy, cFloat1));
+            //
+
             if (_atk.m_DamageType == GridEditor.FTK_weaponStats2.DamageType.physical)
             {
                 _atk.m_TotalDMGPhys = _atk.m_TotalDMG;
@@ -89,6 +153,7 @@ namespace FTKAPI.Objects.SkillHooks
             {
                 Logger.LogError("Error, no damage type assigned");
             }
+            
             if (_atk.m_AttackingDummy.m_CriticalStrike)
             {
                 _atk.m_TotalDMGCrit = FTKUtil.RoundToInt((float)_atk.m_TotalDMG * GameFlow.Instance.m_CritDmgPercent);
@@ -153,14 +218,17 @@ namespace FTKAPI.Objects.SkillHooks
                         if (_atk.m_TotalDMG == 0 && _atk.m_TotalDefendedDMG == 0)
                         {
                             _atk.m_AttackResponse = CharacterDummy.AttackResponse.Block;
+                            CommonBattleHook(_atk.m_DamagedDummy, TriggerType.BlockedAttack, _atk);
                         }
                         else if (_atk.m_DefendedPhys >= _atk.m_DefendedMag)
                         {
                             _atk.m_AttackResponse = CharacterDummy.AttackResponse.Block;
+                            CommonBattleHook(_atk.m_DamagedDummy, TriggerType.BlockedAttack, _atk);
                         }
                         else
                         {
                             _atk.m_AttackResponse = CharacterDummy.AttackResponse.MagicBlock;
+                            CommonBattleHook(_atk.m_DamagedDummy, TriggerType.BlockedMagicAttack, _atk);
                         }
                         if (_atk.m_Harmless)
                         {
@@ -169,18 +237,35 @@ namespace FTKAPI.Objects.SkillHooks
                     }
                     else
                     {
+                        CommonBattleHook(_atk.m_DamagedDummy, TriggerType.TakeAnyDamage, _atk);
+                        CommonBattleHook(_atk.m_AttackingDummy, TriggerType.InflictAnyDamage, _atk);
                         if (num >= 0.5f)
                         {
                             _atk.m_AttackResponse = CharacterDummy.AttackResponse.Damaged;
-                            //Hook Point: light damage reaction
+                            CommonBattleHook(_atk.m_DamagedDummy, TriggerType.TakeLightDamage, _atk);
+                            CommonBattleHook(_atk.m_AttackingDummy, TriggerType.InflictLightDamage, _atk);
                         }
                         else
                         {
                             _atk.m_AttackResponse = CharacterDummy.AttackResponse.DamagedHeavy;
-                            //Hook Point: heavy damage reaction
+                            CommonBattleHook(_atk.m_DamagedDummy, FTKAPI_CharacterSkill.TriggerType.TakeHeavyDamage, _atk);
+                            CommonBattleHook(_atk.m_AttackingDummy, FTKAPI_CharacterSkill.TriggerType.InflictHeavyDamage, _atk);
                         }
+
                         float value = 1f - num;
                         value = Mathf.Clamp(value, 0.07f, 0.22f);
+
+                        // BattleAPI call to get any modifications to the character's chance to proc steadfast.
+                        if ((bool)_atk.m_DamagedDummy.m_CharacterOverworld){
+                            // Basically a fancy pass by reference hehe
+                            CombatFloat combatFloat = new CombatFloat
+                            {
+                                Value = value,
+                                SetFloat = SetFloats.SteadFast
+                            };
+                            value = BattleAPI.Instance.GetFloat(_atk.m_DamagedDummy, combatFloat);
+                        }
+
                         if ((bool)_atk.m_DamagedDummy.m_CharacterOverworld && _atk.m_DamagedDummy.m_CharacterOverworld.m_ShieldID != GridEditor.FTK_itembase.ID.None && UnityEngine.Random.value < value && _atk.m_TotalDMGMag == 0 && _atk.m_DamagedDummy.m_CharacterOverworld.m_CharacterStats.m_CharacterSkills.m_SteadFast)
                         {
                             _atk.m_AttackResponse = CharacterDummy.AttackResponse.SteadFast;
@@ -189,7 +274,6 @@ namespace FTKAPI.Objects.SkillHooks
                             _atk.m_TotalDMGCrit = 0;
                             _atk.m_AttackProficiency = GridEditor.FTK_proficiencyTable.ID.None;
                         }
-                        //Hook Point: Any damage reaction
                     }
                 }
                 else
@@ -211,7 +295,7 @@ namespace FTKAPI.Objects.SkillHooks
                     else if ((bool)_atk.m_AttackingDummy.m_CharacterOverworld && CharacterSkills.Discipline(_atk.m_AttackingDummy.m_CharacterOverworld, _atk.m_DamagedDummy, _killshot: true))
                     {
                         _atk.m_SpecialAttack = CharacterDummy.SpecialAttack.Discipline;
-                    }
+                    } // Can likely comment out this discipline block
                     else if ((bool)_atk.m_AttackingDummy.m_CharacterOverworld)
                     {
                         CommonBattleHook(_atk.m_AttackingDummy, FTKAPI_CharacterSkill.TriggerType.KillShot, _atk);
@@ -236,20 +320,20 @@ namespace FTKAPI.Objects.SkillHooks
         {
             if ((bool)_char.m_CharacterOverworld)
             {
-                Logger.LogWarning("char Overworld");
+                //Logger.LogInfo("char Overworld");
                 if (_char.m_CharacterOverworld.m_CharacterStats.m_CharacterSkills is CustomCharacterSkills)
                 {
-                    Logger.LogWarning("custom skills");
+                    //Logger.LogInfo("custom skills");
                     CustomCharacterSkills _tmpSkills = (CustomCharacterSkills)_char.m_CharacterOverworld.m_CharacterStats.m_CharacterSkills;
                     if (_tmpSkills.Skills != null)
                     {
-                        Logger.LogWarning("not null");
+                        //Logger.LogInfo("not null");
                         foreach (FTKAPI_CharacterSkill _skill in _tmpSkills.Skills)
                         {
-                            Logger.LogWarning("found a skill");
+                            Logger.LogInfo("found a skill: " + _skill.m_DisplayName);
                             if ((_skill.Trigger & _trig) == _trig)
                             {
-                                Logger.LogWarning("Attempting Custom Skill");
+                                Logger.LogInfo("Attempting Custom Skill: " + _skill.m_DisplayName);
                                 _skill.Skill(_char.m_CharacterOverworld, _trig, _atk);
                             }
                         }

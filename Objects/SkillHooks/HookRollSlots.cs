@@ -11,6 +11,7 @@ namespace FTKAPI.Objects.SkillHooks
         public override void Initialize()
         {
             On.uiEncounterSlots.RollSlots += RollSlotsHook;
+
         }
         public void RollSlotsHook(On.uiEncounterSlots.orig_RollSlots _orig, uiEncounterSlots _self, FTK_slotOutput.ID _output, FTK_weaponStats2.SkillType _skill, CharacterOverworld _cow)
         {

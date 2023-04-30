@@ -34,14 +34,14 @@ namespace FTKAPI.Objects.SkillHooks
             c.Emit(OpCodes.Ldarg_0);
             c.EmitDelegate<Func<CharacterSkills,CharacterStats,CustomCharacterSkills>>((_copy, _stats) =>
             {
-                if(_copy is CustomCharacterSkills)
+                /*if(_copy is CustomCharacterSkills)
                 {
                     CustomCharacterSkills tmp = (CustomCharacterSkills)_copy;
-                    Logger.LogInfo(tmp.m_Skills is null);//False
+                    Logger.LogInfo(tmp.m_Skills is null);
                     Logger.LogInfo(_stats.GetType().Name);
-                    Logger.LogInfo(new CustomCharacterSkills(tmp, _stats).m_Skills[0].Name);//NullRef
-                    return new CustomCharacterSkills(tmp,_stats);
-                }
+                    Logger.LogInfo(new CustomCharacterSkills(tmp).m_Skills[0].Name);
+                    return new CustomCharacterSkills(tmp);
+                }*/
                 return new CustomCharacterSkills(_copy);
             });
         }

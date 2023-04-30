@@ -12,43 +12,41 @@ using HutongGames.PlayMaker.Actions;
 
 namespace FTKAPI.Objects
 {
+
     public class CustomModifier : FTK_characterModifier
     {
-        internal FTK_characterModifier.ID myBase = FTK_characterModifier.ID.amuletScare;
+        [Flags]
+        public enum ModTriggerType
+        {
+            None = 0,
+            DamageFac = 1 << 0,
+            DamageAdd = 1 << 1,
+            EvasionAdd = 1 << 2,
+        }
+        internal bool m_conditional = false;
+        internal ModTriggerType m_ModTrigger = ModTriggerType.None;
+        internal FTK_characterModifier.ID myBase = FTK_characterModifier.ID.None;
         internal string PLUGIN_ORIGIN = "null";
 
-        public CustomModifier(ID baseModifier = FTK_characterModifier.ID.amuletScare)
+        public CustomModifier(ID baseModifier = FTK_characterModifier.ID.None)
         {
-            myBase = baseModifier;
-            var source = ModifierManager.GetModifier(baseModifier);
-            foreach (FieldInfo field in typeof(FTK_characterModifier).GetFields())
+            m_CharacterSkills = new CustomCharacterSkills();
+            if (baseModifier != FTK_characterModifier.ID.None)
             {
-                field.SetValue(this, field.GetValue(source));
+                myBase = baseModifier;
+                var source = ModifierManager.GetModifier(baseModifier);
+                foreach (FieldInfo field in typeof(FTK_characterModifier).GetFields())
+                {
+                    field.SetValue(this, field.GetValue(source));
+                }
             }
         }
-        public virtual void AddStatModifierToTally(CharacterStats _player)
+        public virtual float ModifyCombatValue(CharacterOverworld cow, ModTriggerType trig, AttackAttempt atk, bool attacker)
         {
-            _player.m_ModAttackPhysical += 0;
-            _player.m_ModAttackMagic += 0;
-            _player.m_ModAttackAll += 0;
-            _player.m_ModCritChance += 0f;
-            _player.m_ReflectDamage += 0;
-            _player.m_ModToughness += 0f;
-            _player.m_ModAwareness += 0f;
-            _player.m_ModFortitude += 0f;
-            _player.m_ModQuickness += 0f;
-            _player.m_ModTalent += 0f;
-            _player.m_ModVitality += 0f;
-            _player.m_ModLuck += 0.1f;
-            _player.m_ModFindRadius += 0;
-            _player.m_ModShopPrice += 0f;
-            _player.m_ModExtraActions += 0;
-            _player.m_ModMaxFocus += 0;
-            _player.m_ModMaxHealth += 0;
-            _player.m_ModHealthRegen += 0;
-            _player.m_ModXp += 0f;
-            _player.m_ModGold += 0f;
+            return 0f;
         }
+
+
         public FTK_characterModifier.ID BaseModifier
         {
             get => myBase;
@@ -59,6 +57,19 @@ namespace FTKAPI.Objects
             get => this.m_ID;
             set => this.m_ID = value;
         }
+
+        public ModTriggerType ModTrigger
+        {
+            get => m_ModTrigger;
+            set => m_ModTrigger = value;
+        }
+
+        public bool Conditional
+        {
+            get => m_conditional;
+            set => m_conditional = value;
+        }
+
         public int DefensePhysical
         {
             get => this.m_ModDefensePhysical;
@@ -317,7 +328,7 @@ namespace FTKAPI.Objects
             set => this.m_PartyImmuneSteal = value;
         }
 
-        public bool PartyImmune
+        public bool PartyImmuneConfuse
         {
             get => this.m_PartyImmuneConfuse;
             set => this.m_PartyImmuneConfuse = value;
@@ -341,6 +352,11 @@ namespace FTKAPI.Objects
         {
             get => this.m_PartyImmunePetrify;
             set => this.m_PartyImmunePetrify = value;
+        }
+        public bool PartyImmuneBleed
+        {
+            get => this.m_PartyImmuneBleed;
+            set => this.m_PartyImmuneBleed = value;
         }
         public CharacterSkills ModCharacterSkills
         {

@@ -17,6 +17,7 @@ internal class HookProfGet : BaseModule
     {
         Unload();
         On.ProficiencyManager.Get += HookProfManagerGet;
+        
     }
 
     public ProficiencyBase HookProfManagerGet(On.ProficiencyManager.orig_Get _orig, ProficiencyManager _self, GridEditor.FTK_proficiencyTable.ID _pid)

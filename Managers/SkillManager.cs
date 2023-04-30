@@ -20,7 +20,7 @@ public class SkillManager : BaseManager<SkillManager>
     public Dictionary<string, int> enums = new();
     public Dictionary<int, CustomSkill> customDictionary = new();
     public Dictionary<int, CustomSkill> moddedDictionary = new();
-
+    public CustomCharacterSkills globalSkills = new CustomCharacterSkills();
     internal override void Init()
     {
         Plugin.Instance.Harmony.PatchNested<HarmonyPatches>();
@@ -30,6 +30,23 @@ public class SkillManager : BaseManager<SkillManager>
     {
         FTK_characterSkillDB playerSkillDB = TableManager.Instance.Get<FTK_characterSkillDB>();
         return playerSkillDB.m_Array[(int)id];
+    }
+
+    public static void AddGlobal(CustomCharacterSkills skills, BaseUnityPlugin plugin = null)
+    {
+        SkillManager.Instance.globalSkills.AddSkillsCustom(skills);
+        Logger.LogWarning("Skill Manager added global skill:" + skills.Skills[0].m_DisplayName);
+        if (SkillManager.Instance.globalSkills.Skills?.Count() > 0)
+        {
+            foreach (FTKAPI_CharacterSkill skill in SkillManager.Instance.globalSkills.Skills)
+            {
+                Logger.LogWarning("Found global skill: " + skill.m_DisplayName);
+            }
+        }
+        else
+        {
+            Logger.LogError("Global skills are empty!");
+        }
     }
 
     public static int AddSkill(CustomSkill customSkill, BaseUnityPlugin plugin = null)
@@ -98,6 +115,7 @@ public class SkillManager : BaseManager<SkillManager>
                 SkillManager.Instance.enums.Clear();
                 SkillManager.Instance.customDictionary.Clear();
                 SkillManager.Instance.moddedDictionary.Clear();
+                SkillManager.Instance.globalSkills = new CustomCharacterSkills();
             }
         }
 

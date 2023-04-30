@@ -25,7 +25,6 @@ namespace FTKAPI.Objects.SkillHooks
 
         private static void HookRespondToHit(ILContext il)
         {
-
             ILCursor c = new ILCursor(il);
             //Killshot hook
             c.GotoNext(
@@ -36,7 +35,7 @@ namespace FTKAPI.Objects.SkillHooks
                 x => x.MatchLdloc(20),
                 x => x.MatchLdcI4(9)
                 ) ;
-            Logger.LogInfo("I found the keys!");
+            
             c.Emit(OpCodes.Ldarg_0);
             c.Emit(OpCodes.Ldarg_1);
             c.EmitDelegate<Action<CharacterDummy, bool>>((_this, _mainVictim) =>
@@ -61,6 +60,29 @@ namespace FTKAPI.Objects.SkillHooks
                     }
                 }
             });
+            if (c.TryGotoNext(
+                x => x.MatchLdarg(0),
+                x => x.MatchCastclass<EnemyDummy>(),
+                x => x.MatchStloc(28)
+                ))
+            {
+                c.RemoveRange(6);
+                c.Emit(OpCodes.Ldarg_0);
+                c.Emit(OpCodes.Ldloc_S, (byte)27);
+                c.EmitDelegate(CheckEnemy);
+            }
+        }
+        private static void CheckEnemy(CharacterDummy _this, CharacterDummy _attacker)
+        {
+            if (_this is EnemyDummy)
+            {
+                EnemyDummy enemyDummy2 = (EnemyDummy)_this;
+                enemyDummy2.m_LastAttackedBy = _attacker;
+            }
+            else
+            {
+                Logger.LogWarning($"The game was going to cast the dummy {_this.name} to an enemy but we stopped it");
+            }
         }
         public override void Unload()
         {
