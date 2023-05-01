@@ -51,6 +51,7 @@ namespace FTKAPI.APIs.BattleAPI
         private Dictionary<CharacterDummy, List<SpecialCombatAction>> m_SpecialCombatActions = new();
 
         public CharacterOverworld m_CharacterOverworld;
+        public CharacterDummy m_CurrentDummy;
         // Hooks
         HookUiBattleButtons hookUiBattleButtons = new HookUiBattleButtons();
         CharacterDummyHooks hookCharacterDummy = new CharacterDummyHooks();
@@ -86,12 +87,14 @@ namespace FTKAPI.APIs.BattleAPI
         /// Actions that the battle api executes every time a player character starts their turn
         /// </summary>
         /// <param name="player"></param>
-        public void CombatStartTurn(CharacterOverworld player)
+        public void CombatStartTurn(CharacterDummy player)
         {
             Logger.LogInfo("Battle API preforming start of combat turn actions.");
             m_ActiveBattleSkills.Clear();
             m_AttackerProfs.Clear();
-            m_CharacterOverworld = player;
+            RemoveSpecialAction(m_CurrentDummy);
+            m_CurrentDummy = player;
+            m_CharacterOverworld = player.m_CharacterOverworld;
             BattleHelpers.QuerySkills(m_CharacterOverworld, Query.StartCombatTurn);
         }
         /// <summary>
@@ -102,7 +105,10 @@ namespace FTKAPI.APIs.BattleAPI
         public void SendProfInfo(ProfInfoContainer profInfo)
         {
             Logger.LogInfo("Battle API has received a ProfInfoContainer: " + profInfo.AttackProficiency);
-            m_ActiveBattleSkills.Add(profInfo.AttackProficiency, profInfo);
+            if (!m_ActiveBattleSkills.ContainsKey(profInfo.AttackProficiency))
+            {
+                m_ActiveBattleSkills.Add(profInfo.AttackProficiency, profInfo);
+            }
         }
         /// <summary>
         /// Takes ProfInfoContainers from m_ActiveBattleSkills, converts them to ProfValues, and adds them as buttons.
@@ -139,7 +145,7 @@ namespace FTKAPI.APIs.BattleAPI
                 ProfInfoContainer skipProf = new SkipTurnInfo();
                 _battleStance.m_Proficiencies.Add(BattleHelpers.MakeBattleButton(m_CharacterOverworld, skipProf, _battleStance, _weapon));
                 SendProfInfo(skipProf);
-                m_SpecialCombatActions.Remove(dummy);
+                
                 // If we made it this far, return so we don't end up adding the active battle skills.
                 return;
             }
@@ -341,6 +347,14 @@ namespace FTKAPI.APIs.BattleAPI
                     specialActions[0].Merge(specialActions[i]);
                 }
                 m_SpecialCombatActions[_dummy] = new List<SpecialCombatAction> { specialActions[0] };
+            }
+        }
+
+        internal void RemoveSpecialAction(CharacterDummy _dummy)
+        {
+            if (_dummy && m_SpecialCombatActions.ContainsKey(_dummy))
+            {
+                m_SpecialCombatActions.Remove(_dummy);
             }
         }
 

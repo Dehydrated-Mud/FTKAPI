@@ -23,9 +23,15 @@ namespace FTKAPI.APIs.BattleAPI.BattleHooks
         public override void Initialize()
         {
             //IL.uiBattleStanceButtons.CreateWeaponProficiencyButtons += CreateWeaponProficiencyButtonsHook;
+            //On.uiBattleButton.OnLeftClick += LeftClickHook;
             On.uiBattleStanceButtons.CreateWeaponProficiencyButtons += CreateWeaponProficiencyButtonsHook;
             On.uiBattleStanceButtons.DisplayBattleActionInfo += DisplayBattleActionHook;
             IL.uiBattleStanceButtons.DisplayBattleActionInfo += DisplayBattleActionILHook;
+        }
+
+        private void LeftClickHook(On.uiBattleButton.orig_OnLeftClick _orig, uiBattleButton _this)
+        {
+            _orig(_this);
         }
         private void CreateWeaponProficiencyButtonsHook(On.uiBattleStanceButtons.orig_CreateWeaponProficiencyButtons _orig, uiBattleStanceButtons _this, Weapon _weapon, bool _needsReload)
         {

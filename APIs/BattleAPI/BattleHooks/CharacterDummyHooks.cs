@@ -19,7 +19,7 @@ namespace FTKAPI.APIs.BattleAPI.BattleHooks
         private void OnStartCombatTurn(On.CharacterDummy.orig__beginActualEngageAttack _orig, CharacterDummy _this)
         {
             //Logger.LogWarning("This should show at the start of every combat turn!");
-            BattleAPI.Instance.CombatStartTurn(_this.m_CharacterOverworld);
+            BattleAPI.Instance.CombatStartTurn(_this);
             ApplySkills(_this.m_CharacterOverworld, Objects.FTKAPI_CharacterSkill.TriggerType.StartCombatTurn);
             _orig(_this);
         }

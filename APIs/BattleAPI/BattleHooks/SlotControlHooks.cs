@@ -50,7 +50,6 @@ namespace FTKAPI.APIs.BattleAPI.BattleHooks
                 Logger.LogWarning("Perfect roll, attempting to apply skills.");
                 ApplySkills(cow, FTKAPI_CharacterSkill.TriggerType.PerfectCombatRoll);
             }
-            
             _orig(_this, _skip, _player, _spentFocus, _slotResults, _slotSuccess, _goodSlot, _slotType, _prof);
         }
 
