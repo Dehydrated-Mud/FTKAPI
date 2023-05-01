@@ -8,13 +8,17 @@ using FTKAPI.Managers;
 using FTKAPI.Objects;
 using GridEditor;
 using ProfValues = uiBattleStanceButtons.ProfValues;
+using System.ComponentModel;
+
 namespace FTKAPI.APIs.BattleAPI
 {
+    using ProficiencyManager = FTKAPI.Managers.ProficiencyManager;
     public enum Query
     {
         None = 0,
         StartCombatTurn,
-        EndCombat
+        EndCombat,
+        StartCombat
     }
 
     public enum SetFlags
@@ -44,7 +48,7 @@ namespace FTKAPI.APIs.BattleAPI
         private Dictionary<CharacterDummy, List<CombatFloat>> m_CombatFloats = new ();
         private Dictionary<CharacterDummy, List<CombatFloat>> m_CustomStats = new();
         private List<FTK_proficiencyTable.ID> m_AttackerProfs = new();
-        private Dictionary<CharacterDummy, List<SpecialCombatAction>> m_SpecialCombatActions;
+        private Dictionary<CharacterDummy, List<SpecialCombatAction>> m_SpecialCombatActions = new();
 
         public CharacterOverworld m_CharacterOverworld;
         // Hooks
@@ -59,6 +63,8 @@ namespace FTKAPI.APIs.BattleAPI
         internal void Initialize()
         {
             Logger.LogInfo("Initializing the Battle API");
+            // Add the proficiency that allows us to "skip" a turn.
+            // Init hooks
             hookUiBattleButtons.Initialize();
             hookCharacterDummy.Initialize();
             hookDamageCalculation.Initialize();
@@ -107,14 +113,35 @@ namespace FTKAPI.APIs.BattleAPI
             CharacterDummy dummy = m_CharacterOverworld.GetCurrentDummy();
             if (m_SpecialCombatActions.ContainsKey(dummy) && m_SpecialCombatActions[dummy].Count > 0)
             {
-                SpecialCombatAction specialAction = m_SpecialCombatActions[dummy][0];
-                foreach (ProfInfoContainer container in m_ActiveBattleSkills.Values)
+                foreach(ProfValues prof in _battleStance.m_Proficiencies)
                 {
-                    _battleStance.m_Proficiencies.Add(BattleHelpers.MakeBattleButton(m_CharacterOverworld, container, _battleStance, _weapon));
+                    prof.m_Button.gameObject.SetActive(false);
                 }
-                _battleStance.m_FleeButton.SetCanUse(false);
+                // Make sure that all of the special actions for this dummy are consolidated and stored at index 0
+                ConsolidateSpecialActions(dummy);
+                // Always add the skip turn button
+                SpecialCombatAction specialAction = m_SpecialCombatActions[dummy][0];
+                if (specialAction.SpecialProfs.Count > 0)
+                {
+                    foreach (ProfInfoContainer container in specialAction.SpecialProfs)
+                    {
+                        // Send the prof info so that attack animation overrides work correctly
+                        SendProfInfo(container);
+                        _battleStance.m_Proficiencies.Add(BattleHelpers.MakeBattleButton(m_CharacterOverworld, container, _battleStance, _weapon));
+                    }
+                }
+                _battleStance.m_FleeButton.gameObject.SetActive(false);
+                _battleStance.m_AttackButton.gameObject.SetActive(false);
+                _battleStance.m_ShieldTauntButton.gameObject.SetActive(specialAction.Taunt);
                 _battleStance.m_ShieldTauntButton.SetCanUse(specialAction.Taunt);
                 _battleStance.m_EquipWeaponButton.SetCanUse(_battleStance.m_EquipWeaponButton.m_CanUse && specialAction.EquipWeapon);
+                // Remove the special actions for this character
+                ProfInfoContainer skipProf = new SkipTurnInfo();
+                _battleStance.m_Proficiencies.Add(BattleHelpers.MakeBattleButton(m_CharacterOverworld, skipProf, _battleStance, _weapon));
+                SendProfInfo(skipProf);
+                m_SpecialCombatActions.Remove(dummy);
+                // If we made it this far, return so we don't end up adding the active battle skills.
+                return;
             }
             if (m_ActiveBattleSkills != null && m_ActiveBattleSkills.Count > 0) 
             {
@@ -304,19 +331,16 @@ namespace FTKAPI.APIs.BattleAPI
         /// <summary>
         /// All dummies with multiple combat actions will have their special actions merged into one.
         /// </summary>
-        internal void ConsolidateSpecialActions()
+        internal void ConsolidateSpecialActions(CharacterDummy _dummy)
         {
-            foreach(CharacterDummy _dummy in m_SpecialCombatActions.Keys)
+            List<SpecialCombatAction> specialActions = m_SpecialCombatActions[_dummy];
+            if (specialActions.Count > 1)
             {
-                List<SpecialCombatAction> specialActions = m_SpecialCombatActions[_dummy];
-                if (specialActions.Count > 1)
+                for (int i = 1; i < specialActions.Count; i++)
                 {
-                    for (int i = 1; i < specialActions.Count; i++)
-                    {
-                        specialActions[0].Merge(specialActions[i]);
-                    }
-                    m_SpecialCombatActions[_dummy] = new List<SpecialCombatAction> { specialActions[0] };
+                    specialActions[0].Merge(specialActions[i]);
                 }
+                m_SpecialCombatActions[_dummy] = new List<SpecialCombatAction> { specialActions[0] };
             }
         }
 
@@ -335,6 +359,12 @@ namespace FTKAPI.APIs.BattleAPI
             Logger.LogInfo("Battle API marks this as the start of battle. Preforming start of battle actions.");
             // Populate the customstat dictionaries with the custom stats that we want to track throughout the battle
             GetCustomStats();
+            foreach(FTKPlayerID combatant in EncounterSessionMC.Instance.m_AllCombtatants)
+            {
+                CharacterOverworld dummy = FTKHub.Instance.GetCharacterOverworldByFID(combatant);
+                BattleHelpers.QuerySkills(dummy, Query.StartCombat);
+            }
+            
         }
         internal void EndOfBattle()
         {

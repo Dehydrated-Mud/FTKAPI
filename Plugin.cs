@@ -7,6 +7,7 @@ using FTKAPI.Objects.SkinHooks;
 using FTKAPI.APIs.BattleAPI;
 using FTKAPI.PhotonHooks;
 using FTKAPI.Utils;
+using GridEditor;
 using HarmonyLib;
 
 namespace FTKAPI
@@ -73,12 +74,22 @@ namespace FTKAPI
             hookSetDevoteCount.Initialize();
             hookTallyCharacterMods.Initialize();
             hookInstantiate.Initialize();
-
             BattleAPI.Instance.Initialize();
+           // Harmony harmony = new Harmony(Info.Metadata.GUID);
+            //harmony.PatchAll();
             // Plugin startup logic
             Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
         }
-        
+
+        /*[HarmonyPatch(typeof(TableManager), "Initialize")]
+        class TableManager_Initialize_Patch
+        {
+            static void Postfix()
+            {
+                
+            }
+        }*/
+
         [HarmonyPatch(typeof(SerializeGO), "ShowBugForm")]
         class NukeShowBugForm
         {

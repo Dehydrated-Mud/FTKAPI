@@ -5,15 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FTKAPI.APIs.BattleAPI.SkipTurn
+namespace FTKAPI.APIs.BattleAPI
 {
-    internal class SkipTurnProf : CustomProficiency
+    public class SkipTurnProf : CustomProficiency
     {
-        internal SkipTurnProf() 
+        public SkipTurnProf() 
         {
             Target = CharacterDummy.TargetType.None;
             TargetFriendly = true;
-            Category = Category.None;
+            Category = Category.Cure;
             ProficiencyPrefab = this;
             SlotOverride = 1;
             PerSlotSkillRoll = 1f;

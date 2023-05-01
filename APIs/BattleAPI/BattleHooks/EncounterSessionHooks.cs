@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Logger = FTKAPI.Utils.Logger;
+using FightOrderEntry = EncounterSessionMC.FightOrderEntry;
 
 namespace FTKAPI.APIs.BattleAPI.BattleHooks
 {
@@ -12,8 +13,19 @@ namespace FTKAPI.APIs.BattleAPI.BattleHooks
         public override void Initialize()
         {
             Unload();
+            On.EncounterSessionMC.ComputeFightOrder += ComputeFightOrderHook;
             On.EncounterSessionMC.FinalEncounterFinished += EncounterFinishedHook;
             On.EncounterSession.StartEncounterSession_Actual += EncounterStartHook;
+        }
+
+        private List<FightOrderEntry> ComputeFightOrderHook(On.EncounterSessionMC.orig_ComputeFightOrder _orig, EncounterSessionMC _this, FTKPlayerID[] _fightOrder, FTKPlayerID _firstAttacker, Dictionary<FTKPlayerID, float> _speedTable)
+        {
+            List<FightOrderEntry> orig = _orig(_this, _fightOrder, _firstAttacker, _speedTable);
+            foreach(CharacterDummy dummy in BattleAPI.Instance.SpecialCombatActions.Keys)
+            {
+                orig.Insert(0, new FightOrderEntry(dummy.m_CharacterOverworld.m_FTKPlayerID, _this.m_ActiveTimePortraitID++));
+            }
+            return orig;
         }
 
         private void EncounterFinishedHook(On.EncounterSessionMC.orig_FinalEncounterFinished _orig, EncounterSessionMC _this, bool _encounterVictory, bool _callFromDialog)
