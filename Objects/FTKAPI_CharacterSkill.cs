@@ -47,6 +47,10 @@ namespace FTKAPI.Objects
             PerfectCombatRoll = 1 << 23,
             BlockedAttack = 1 << 24,
             BlockedMagicAttack = 1 << 25,
+            CalledShot = 1 << 26,
+            DamageCalcEnd = 1 << 27,
+            SlotResults = 1 << 28,
+            PerfectEncounterRoll = 1 << 29,
 
         }
 

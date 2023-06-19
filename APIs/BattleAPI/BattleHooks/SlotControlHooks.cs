@@ -20,7 +20,36 @@ namespace FTKAPI.APIs.BattleAPI.BattleHooks
         {
             On.SlotControl.SetSlotResults += SetSlotResultsHook;
             IL.SlotControl.ComputeAttackSlotResults += ComputeResultsHook;
+            IL.SlotSystemBase.DidAttackerGetEncouragedSlot += EncourageHook;
+            IL.SlotSystemBase.DidAttackerGetDistractedSlot+= DistractHook;
         }
+
+        private void DistractHook(ILContext _il)
+        {
+            ILCursor c = new ILCursor(_il);
+            if (c.TryGotoNext(
+                x => x.MatchCallOrCallvirt<UnityEngine.Random>("get_value")
+                ))
+            {
+                c.Index += 2;
+                c.Emit(OpCodes.Ldloc_3);
+                c.EmitDelegate<Func<float, CharacterDummy, float>>(DistractDelegate);
+            }
+        }
+
+        private void EncourageHook(ILContext _il)
+        {
+            ILCursor c = new ILCursor(_il);
+            if (c.TryGotoNext(
+                x => x.MatchCallOrCallvirt<UnityEngine.Random>("get_value")
+                ))
+            {
+                c.Index += 2;
+                c.Emit(OpCodes.Ldloc_1);
+                c.EmitDelegate<Func<float, CharacterDummy, float>>(EncourageDelegate);
+            }
+        }
+
 
         private void SetSlotResultsHook(On.SlotControl.orig_SetSlotResults _orig, SlotControl _this, bool _skip, FTKPlayerID _player, int _spentFocus, string[] _slotResults, int _slotSuccess, string _goodSlot, SlotType _slotType, int _prof)
         {
@@ -85,21 +114,49 @@ namespace FTKAPI.APIs.BattleAPI.BattleHooks
             }
         }
 
+        private float EncourageDelegate(float _orig, CharacterDummy _dummy)
+        {
+            CombatFloat combatFloat = new CombatFloat
+            {
+                Value = _orig,
+                SetFloat = SetFloats.EncourageChance
+            };
+            
+            return BattleAPI.Instance.GetFloat(_dummy, combatFloat);
+        }
+
+        private float DistractDelegate(float _orig, CharacterDummy _dummy)
+        {
+            CombatFloat combatFloat = new CombatFloat
+            {
+                Value = _orig,
+                SetFloat = SetFloats.DistractChance
+            };
+
+            return BattleAPI.Instance.GetFloat(_dummy, combatFloat);
+        }
+
         private bool CriticalDelegate(CharacterOverworld _cow, bool _flag)
         {
             // If the battleAPI has a flag it wants to set, it will send it here. Else, it will give back the original value
             CombatFlag critFlag = new CombatFlag { Value = _flag, Flag = SetFlags.Crit };
             CharacterDummy dummy = _cow.GetCombatDummy();
             bool flag = BattleAPI.Instance.GetFlag(dummy, critFlag);
-            bool isDangerous = (dummy.m_SpecialAttack == CharacterDummy.SpecialAttack.Justice || dummy.m_SpecialAttack == CharacterDummy.SpecialAttack.CalledShot);
+            /*bool isDangerous = (dummy.m_SpecialAttack == CharacterDummy.SpecialAttack.Justice || dummy.m_SpecialAttack == CharacterDummy.SpecialAttack.CalledShot); // Is it dangerous to overwrite?
+
+            // If the BattleAPI didn't change the flag, make sure we are not overriding justice or called shot
             bool cond = flag && (!isDangerous || critFlag.Override);
-            if (cond)
+
+
+
+            */
+            if (flag)
             {
                 Logger.LogWarning("flag is true, sending crit");
                 ApplySkills(_cow, FTKAPI_CharacterSkill.TriggerType.Critical);
                 dummy.m_CriticalStrike = true;
             }
-            return cond;
+            return flag;
         }
 
         public override void Unload()

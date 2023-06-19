@@ -307,6 +307,8 @@ namespace FTKAPI.Objects.SkillHooks
                     }
                 }
             }
+            CommonBattleHook(_atk.m_AttackingDummy, TriggerType.DamageCalcEnd, _atk);
+            CommonBattleHook(_atk.m_DamagedDummy, TriggerType.DamageCalcEnd, _atk);
             return new DummyDamageInfo(_atk, _mainTarget);
         }
 

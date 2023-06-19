@@ -25,7 +25,8 @@ namespace FTKAPI.Objects.SkillHooks
 
         private int GetShopItemCostHook(On.uiBuyMenuHud.orig_GetShopItemCost orig, uiBuyMenuHud self, FTK_itembase.ID _item)
         {
-            MiniHexInfo pOI = self.m_CurrentCow.GetPOI();
+            //MiniHexInfo pOI = self.m_CurrentCow.GetPOI(); //Does not exist when you are on another tile and shift+clicking on the shop!
+            MiniHexInfo pOI = self.m_ShopPOI;
             if (ItemManager.Instance.customDictionary.TryGetValue((int)_item, out CustomItem customItem))
             {
                 if (customItem.IsWeapon)

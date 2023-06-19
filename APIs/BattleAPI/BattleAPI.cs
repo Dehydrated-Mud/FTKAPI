@@ -35,7 +35,11 @@ namespace FTKAPI.APIs.BattleAPI
         IncomingTotalDmg,
         ImperviousArmor,
         ImperviousResist,
-        DamageReflection
+        DamageReflection,
+        LifestealFac,
+        CalledShot,
+        EncourageChance,
+        DistractChance
     }
     public class BattleAPI : BaseManager<BattleAPI>
     {
@@ -48,8 +52,12 @@ namespace FTKAPI.APIs.BattleAPI
         private Dictionary<CharacterDummy, List<CombatFloat>> m_CombatFloats = new ();
         private Dictionary<CharacterDummy, List<CombatFloat>> m_CustomStats = new();
         private List<FTK_proficiencyTable.ID> m_AttackerProfs = new();
+        private List<FTK_itembase.ID> m_ItemsToAdd = new();
+        private Dictionary<CharacterOverworld, int> m_BonusXp = new ();
+        private Dictionary<CharacterOverworld, int> m_BonusGold = new();
         private Dictionary<CharacterDummy, List<SpecialCombatAction>> m_SpecialCombatActions = new();
-
+        private List<FTKPlayerID> m_ToRush = new ();
+        private Dictionary<CharacterDummy, List<FTK_proficiencyTable.ID[]>> m_StartTurnProfs = new ();
         public CharacterOverworld m_CharacterOverworld;
         public CharacterDummy m_CurrentDummy;
         // Hooks
@@ -58,6 +66,8 @@ namespace FTKAPI.APIs.BattleAPI
         DamageCalculationHooks hookDamageCalculation= new DamageCalculationHooks();
         SlotControlHooks hookSlotControl = new SlotControlHooks();
         EncounterSessionHooks hookEncounterSession = new();
+        GameLogicHooks hookGameLogic = new();
+        CharacterSkillsHooks hookCharacterSkills = new();
         /// <summary>
         /// Battle API initialize all hooks
         /// </summary>
@@ -71,6 +81,8 @@ namespace FTKAPI.APIs.BattleAPI
             hookDamageCalculation.Initialize();
             hookSlotControl.Initialize();
             hookEncounterSession.Initialize();
+            hookGameLogic.Initialize();
+            hookCharacterSkills.Initialize();
         }
         /// <summary>
         /// Battle API unload all hooks
@@ -82,6 +94,8 @@ namespace FTKAPI.APIs.BattleAPI
             hookDamageCalculation.Unload();
             hookSlotControl.Unload();
             hookEncounterSession.Unload();
+            hookGameLogic.Unload();
+            hookCharacterSkills.Unload();
         }
         /// <summary>
         /// Actions that the battle api executes every time a player character starts their turn
@@ -92,11 +106,18 @@ namespace FTKAPI.APIs.BattleAPI
             Logger.LogInfo("Battle API preforming start of combat turn actions.");
             m_ActiveBattleSkills.Clear();
             m_AttackerProfs.Clear();
+            m_ToRush.Clear();
+            m_BonusXp.Clear();
+            m_BonusGold.Clear();
             RemoveSpecialAction(m_CurrentDummy);
             m_CurrentDummy = player;
             m_CharacterOverworld = player.m_CharacterOverworld;
             BattleHelpers.QuerySkills(m_CharacterOverworld, Query.StartCombatTurn);
+            ApplyStartTurnProfs(player);
         }
+
+
+
         /// <summary>
         /// Add the special proficiency info to the battle API's queue of possible abilities.
         /// Provide this function with a new ProfInfoContainer
@@ -157,6 +178,35 @@ namespace FTKAPI.APIs.BattleAPI
                 }
             }
         }
+
+        /// <summary>
+        /// Give the battle API a proficiency that should be applied to the given dummy at the start of their next turn.
+        /// </summary>
+        /// <param name="_dummy"></param>
+        /// <param name="_profs"></param>
+        public void ApplyProfNextTurn(CharacterDummy _dummy, FTK_proficiencyTable.ID[] _profs)
+        {
+            if(m_StartTurnProfs.ContainsKey(_dummy))
+            {
+                m_StartTurnProfs[_dummy].Add(_profs);
+            }
+            else
+            {
+                m_StartTurnProfs[_dummy] = new List<FTK_proficiencyTable.ID[]> { _profs };
+            }
+        }
+
+        internal void ApplyStartTurnProfs(CharacterDummy _dummy)
+        {
+            if (m_StartTurnProfs.ContainsKey(_dummy))
+            {
+                foreach (FTK_proficiencyTable.ID[] profs in m_StartTurnProfs[_dummy])
+                {
+                    _dummy.RPCAllSelf("AddProfToDummy", new object[3] { profs, true, true });
+                }
+            }
+        }
+
         /// <summary>
         /// Sets a combat flag to true or false. Will be removed form combat flag queue upon handling
         /// </summary>
@@ -335,6 +385,58 @@ namespace FTKAPI.APIs.BattleAPI
         }
 
         /// <summary>
+        /// Adds item drops to be given out at the end of battle
+        /// </summary>
+        /// <param name="_item"></param>
+        public void AddDrop(FTK_itembase.ID _item)
+        {
+            m_ItemsToAdd.Add(_item);
+        }
+
+        /// <summary>
+        /// Add bonus XP for the specified player. Applied in GameLogicHooks
+        /// </summary>
+        /// <param name="_player"></param>
+        /// <param name="_amount"></param>
+        public void AddXp(CharacterOverworld _player, int _amount)
+        {
+            if (m_BonusXp.Keys.Contains(_player))
+            {
+                m_BonusXp[_player] += _amount;
+            }
+            else
+            {
+                m_BonusXp[_player] = _amount;
+            }
+        }
+
+        /// <summary>
+        /// Add bonus gold for the specified player. Applied in GameLogicHooks
+        /// </summary>
+        /// <param name="_player"></param>
+        /// <param name="_amount"></param>
+        public void AddGold(CharacterOverworld _player, int _amount)
+        {
+            if (m_BonusGold.Keys.Contains(_player))
+            {
+                m_BonusGold[_player] += _amount;
+            }
+            else
+            {
+                m_BonusGold[_player] = _amount;
+            }
+        }
+
+        /// <summary>
+        /// Rush a player
+        /// </summary>
+        /// <param name="_player"></param>
+        public void RushPlayer(CharacterOverworld _player)
+        {
+            m_ToRush.Add(_player.m_FTKPlayerID);
+        }
+
+        /// <summary>
         /// All dummies with multiple combat actions will have their special actions merged into one.
         /// </summary>
         internal void ConsolidateSpecialActions(CharacterDummy _dummy)
@@ -360,10 +462,11 @@ namespace FTKAPI.APIs.BattleAPI
 
         internal void ApplyProfsToAttacker(CharacterDummy _dummy)
         {
-            if (AttackerProfs.Count > 0)
+            if (m_AttackerProfs.Count > 0)
             {
                 FTK_proficiencyTable.ID[] profs = AttackerProfs.ToArray();
                 _dummy.AddProfToDummy(profs, true, true);
+                m_AttackerProfs.Clear();
             }
         }
 
@@ -371,6 +474,8 @@ namespace FTKAPI.APIs.BattleAPI
         {
             // Called by encounter session hook
             Logger.LogInfo("Battle API marks this as the start of battle. Preforming start of battle actions.");
+            m_ItemsToAdd.Clear();
+            m_StartTurnProfs.Clear();
             // Populate the customstat dictionaries with the custom stats that we want to track throughout the battle
             GetCustomStats();
             foreach(FTKPlayerID combatant in EncounterSessionMC.Instance.m_AllCombtatants)
@@ -391,7 +496,8 @@ namespace FTKAPI.APIs.BattleAPI
             ClearCombatFlags();
             ClearCombatFloats();
             ClearStats();
-            AttackerProfs.Clear();
+            m_StartTurnProfs.Clear();
+            m_AttackerProfs.Clear();
         }
         internal void ClearCombatFlags()
         {
@@ -449,5 +555,29 @@ namespace FTKAPI.APIs.BattleAPI
         /// A collection of special combat actions that a character dummy will get at the beginning of combat.
         /// </summary>
         public Dictionary<CharacterDummy, List<SpecialCombatAction>> SpecialCombatActions { get { return m_SpecialCombatActions;} }
+        /// <summary>
+        /// A list of items that should be dropped to the players after battle
+        /// </summary>
+        public List<FTK_itembase.ID> ItemsToAdd { get { return m_ItemsToAdd; } }
+
+        /// <summary>
+        /// Give bonus XP to players that have earned it
+        /// </summary>
+        public Dictionary<CharacterOverworld, int> BonusXp { get { return m_BonusXp; } }
+
+        /// <summary>
+        /// Give bonus Gold to players that have earned it
+        /// </summary>
+        public Dictionary<CharacterOverworld, int> BonusGold {  get { return m_BonusGold;} }
+
+        /// <summary>
+        /// Queue of players to rush
+        /// </summary>
+        public List<FTKPlayerID> ToRush { get { return m_ToRush; } }
+
+        /// <summary>
+        /// Dictionary of proficiencies that should be applied to the character dummy at the start of their next turn
+        /// </summary>
+        public Dictionary<CharacterDummy, List<FTK_proficiencyTable.ID[]>> StartTurnProfs { get { return m_StartTurnProfs;} }
     }
 }

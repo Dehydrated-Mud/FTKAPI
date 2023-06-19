@@ -148,4 +148,11 @@ namespace FTKAPI.APIs.BattleAPI
         }
 
     }
+    /// <summary>
+    /// Fight order entries that have been added by the API
+    /// </summary>
+    public class APIFightOrderEntry : EncounterSessionMC.FightOrderEntry
+    {
+        public APIFightOrderEntry(FTKPlayerID _pid, int _entryID) : base(_pid, _entryID) { }
+    }
 }

@@ -26,12 +26,24 @@ namespace FTKAPI.APIs.BattleAPI.BattleHooks
 
         private void FinishedAttackHook(On.CharacterDummy.orig_ActionCompleted _orig, CharacterDummy _this)
         {
-            CombatFloat combatFloat = new CombatFloat
+            CombatFloat combatFloat = new CombatFloat //Even though this says damage reflection, its actually just post attack in general
             {
                 Value = _this.m_PostAttackHealthMod,
                 SetFloat = SetFloats.DamageReflection
             };
-            _this.m_PostAttackHealthMod = FTKUtil.RoundToInt(BattleAPI.Instance.GetFloat(_this, combatFloat));
+            CombatFloat lifestealFac = new CombatFloat
+            {
+                Value = 0,
+                SetFloat = SetFloats.LifestealFac
+            };
+            int postAttack = FTKUtil.RoundToInt(BattleAPI.Instance.GetFloat(_this, combatFloat));
+            Logger.LogWarning("Post Attack mod:" + postAttack);
+            if (postAttack < 0)
+            {
+                postAttack = (int)((BattleAPI.Instance.GetFloat(_this, lifestealFac) + 1f)*(float)postAttack);
+            }
+            Logger.LogWarning("Post Attack mod:" + postAttack);
+            _this.m_PostAttackHealthMod = postAttack;
             _orig(_this);
             BattleAPI.Instance.ApplyProfsToAttacker(_this);
         }
