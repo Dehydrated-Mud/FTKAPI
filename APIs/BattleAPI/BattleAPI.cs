@@ -105,6 +105,7 @@ namespace FTKAPI.APIs.BattleAPI
         {
             Logger.LogInfo("Battle API preforming start of combat turn actions.");
             m_ActiveBattleSkills.Clear();
+            ActiveBattleSkill = FTK_proficiencyTable.ID.None;
             m_AttackerProfs.Clear();
             m_ToRush.Clear();
             m_BonusXp.Clear();
@@ -531,6 +532,8 @@ namespace FTKAPI.APIs.BattleAPI
         /// Read only list of the API's current registered special profs
         /// </summary>
         public Dictionary<FTK_proficiencyTable.ID, ProfInfoContainer> ActiveBattleSkills { get { return m_ActiveBattleSkills;} }
+
+        public FTK_proficiencyTable.ID ActiveBattleSkill { get; set; }
         /// <summary>
         /// Queue of combat flags
         /// </summary>

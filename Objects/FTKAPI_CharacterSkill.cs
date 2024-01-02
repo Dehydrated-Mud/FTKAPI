@@ -152,10 +152,23 @@ namespace FTKAPI.Objects
         /// <summary>
         /// Should the character's weapon have to match a specific weapon subtype?
         /// </summary>
+        /// 
         public bool CheckWeaponSubType { get; set; } = false;
+
+        /// <summary>
+        /// HitEffect to override with. FTK_hitEffect.ID.None will result in no override.
+        /// </summary>
+        public FTK_hitEffect.ID HitEffectOverride { get; set; } = FTK_hitEffect.ID.None;
+
+        /// <summary>
+        /// The animator to override with
+        /// </summary>
+        public string AnimatorOverride { get; set; } = "";
+
         /// <summary>
         /// The proficiency itself
         /// </summary>
+        /// 
         public FTK_proficiencyTable.ID AttackProficiency { get; set; } = FTK_proficiencyTable.ID.None;
         /// <summary>
         /// The damage type that the weapon must use in order to use this skill. None => any
@@ -238,6 +251,7 @@ namespace FTKAPI.Objects
             CheatType = _copy.CheatType;
             AttackAnim = _copy.AttackAnim;
             AttackAnimOverride = _copy.AttackAnimOverride;
+            AnimatorOverride = _copy.AnimatorOverride;
             WeaponType = _copy.WeaponType;
             WeaponSubType = _copy.WeaponSubType;
             BattleButton = _copy.BattleButton;

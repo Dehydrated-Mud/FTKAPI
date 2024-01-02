@@ -38,8 +38,6 @@ namespace FTKAPI.APIs.BattleAPI
             }
             return null;
         }
-
-
         internal static ProfValues MakeBattleButton(CharacterOverworld _player, ProfInfoContainer _info, uiBattleStanceButtons _battleStance, Weapon _weapon)
         {
             ProfValues item = default(ProfValues);

@@ -24,6 +24,7 @@ namespace FTKAPI.APIs.BattleAPI.BattleHooks
             IL.SlotSystemBase.DidAttackerGetDistractedSlot+= DistractHook;
         }
 
+
         private void DistractHook(ILContext _il)
         {
             ILCursor c = new ILCursor(_il);
@@ -82,9 +83,25 @@ namespace FTKAPI.APIs.BattleAPI.BattleHooks
             _orig(_this, _skip, _player, _spentFocus, _slotResults, _slotSuccess, _goodSlot, _slotType, _prof);
         }
 
+        private void SetProfDelegate(FTK_proficiencyTable.ID _prof)
+        {
+            BattleAPI.Instance.ActiveBattleSkill = _prof;
+            if (BattleAPI.Instance.m_CharacterOverworld != null)
+            {
+                CharacterEventListener listener = BattleHelpers.GetListener(BattleAPI.Instance.m_CharacterOverworld);
+                listener.HookupWeaponForBattle();
+            }
+        }
+
         private void ComputeResultsHook(ILContext il) 
         { 
             ILCursor c = new ILCursor(il);
+
+            // Set the active battle prof to the one being computed
+            c.Goto(0);
+            c.Emit(OpCodes.Ldarg_3);
+            c.EmitDelegate(SetProfDelegate);
+
             if (c.TryGotoNext(
                 x => x.MatchLdloc(12),
                 x => x.MatchLdfld<FTK_weaponStats2>("_skilltest"),
